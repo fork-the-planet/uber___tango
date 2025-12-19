@@ -41,10 +41,6 @@ mockgen -destination=<source file> . <Interface><Interface>
 mockgen -package=tangopbmock  -self_package=tangopbmock  -destination=tangopbmock/tangopbmock.go . TangoServiceGetChangedServicesYARPCServer,TangoServiceGetChangedTargetGraphYARPCServer,TangoServiceGetChangedTargetsYARPCServer,TangoServiceGetTargetGraphYARPCServer
 ```
 
-# Publish go module to artifactory
-## Your SSH access and netrc are already set up via usso:
-usso -ussh artifacts.uberinternal.com -netrc ~/.netrc
-
 ## Update new module version
 Run
 ```
