@@ -1,0 +1,39 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "bazel",
+    srcs = [
+        "bazel.go",
+        "command.go",
+        "query.go",
+        "stream.go",
+    ],
+    importpath = "github.com/uber/tango/core/bazel",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_bazelbuild_buildtools//build_proto",
+        "@com_github_gogo_protobuf//proto",
+        "@org_golang_google_protobuf//encoding/protodelim",
+        "@org_golang_x_sync//errgroup",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "bazel_test",
+    srcs = [
+        "bazel_test.go",
+        "query_test.go",
+    ],
+    embed = [":bazel"],
+    deps = [
+        "//core/bazel/commandermock",
+        "@com_github_bazelbuild_buildtools//build_proto",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_protobuf//encoding/protodelim",
+        "@org_uber_go_goleak//:goleak",
+        "@org_uber_go_mock//gomock",
+        "@org_uber_go_zap//:zap",
+    ],
+)

@@ -1,0 +1,27 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "targethasher",
+    srcs = [
+        "graph.go",
+        "sourcehasher.go",
+    ],
+    importpath = "github.com/uber/tango/core/targethasher",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//tangopb",
+        "@com_github_bazelbuild_buildtools//build_proto",
+        "@com_github_bazelbuild_buildtools//labels",
+    ],
+)
+
+go_test(
+    name = "targethasher_test",
+    srcs = ["sourcehasher_test.go"],
+    embed = [":targethasher"],
+    deps = [
+        "@com_github_bazelbuild_buildtools//build_proto",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

@@ -1,0 +1,22 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tangopb",
+    srcs = [
+        "tango.pb.go",
+        "tango.pb.yarpc.go",
+    ],
+    importpath = "github.com/uber/tango/tangopb",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_gogo_protobuf//jsonpb",
+        "@com_github_gogo_protobuf//proto",
+        "@com_github_gogo_protobuf//sortkeys",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_yarpc//:yarpc",
+        "@org_uber_go_yarpc//api/transport",
+        "@org_uber_go_yarpc//api/x/restriction",
+        "@org_uber_go_yarpc//encoding/protobuf",
+        "@org_uber_go_yarpc//encoding/protobuf/reflection",
+    ],
+)

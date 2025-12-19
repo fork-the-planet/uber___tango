@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package uber.devexp.tango;
+
+option go_package = "tangopb";
+option java_multiple_files = true;
+option java_outer_classname = "TangoProto";
+option java_package = "com.uber.devexp.tango";
+
+// BuildDescription defines a Storage state by a primary revision string and
+// an optional list of change identifiers (e.g., diff IDs or PR IDs).
+message BuildDescription {
+    // The remote of the Storage, like "mobile/android"
+    string remote = 1;
+    // The base commit sha of the Storage
+    string base_sha = 2;
+    // List of change request URLs to apply on top of the base revision.
+    // This can be a phabricator diff URL or a github pull request URL.
+    // If empty, the computation happens on the base revision.
+    repeated string request_urls = 3;
+    // The computation strategy of the original target graph
+    ComputationStrategy strategy = 4;
+}
+
+
+// ComputationStrategy controls the computation strategy to use for the target graph
+enum ComputationStrategy {
+    // A special defaul marker for invalid state
+    COMPUTATION_STRATEGY_INVALID = 0;
+    // Computation strategy is not set and should be the default
+    COMPUTATION_STRATEGY_UNSET = 1;
+    // Computation strategy uses custom shell commands to compute the initial target graph
+    COMPUTATION_STRATEGY_SHELL = 2;
+    // Computation strategy uses native Bazel API to compute the initial target graph
+    COMPUTATION_STRATEGY_NATIVE = 3;
+}
+
+// OutputConfig controls what payload details are included in responses.
+// Some flags may be ignored depending on the specific API.
+message OutputConfig {
+    // Indicates if tags should be included in the response
+    bool include_tags = 1;
+    // Indicates if build target attributes should be included in the response
+    bool include_attributes = 2;
+    // Indicates if hashes should be computed for each target and included in the response
+    bool include_hashes = 3;
+    // Indicates if only root targets (i.e. targets that are not depended on by any other targets) should be included in the response
+    bool roots_only = 4;
+}
+
+// OptimizedTarget represents a build target in a compact format with stable numeric identifiers for
+// names and dependencies. Optional fields may be omitted based on OutputConfig.
+message OptimizedTarget {
+    // Unique identifier for the target
+    int32 id = 1;
+    // Hash of the target (optional)
+    string hash = 2;
+    // List of IDs representing direct dependencies
+    repeated int32 direct_dependencies = 3;
+    // List of IDs representing tags (optional)
+    repeated int32 tags = 4;
+    // ID representing the rule type (optional)
+    int32 rule_type = 5;
+    // Indicates if the target is a root target (optional)
+    bool root = 6;
+    // Indicates if the target is external (optional)
+    bool external = 7;
+    // Map of attribute IDs to values (optional)
+    map<int32, int32> attributes = 8;
+}
+
+// OptimizedTargets represents a set of optimized targets.
+message OptimizedTargets {
+    // List of optimized targets which are a part of the target graph
+    repeated OptimizedTarget targets = 1;
+}
+
+// Metadata emitted as the last stream item to provide id->name mappings, etc.
+message Metadata {
+    // Map of target IDs to names
+    map<int32, string> target_id_mapping = 1;
+    // Map of rule type IDs to names
+    map<int32, string> rule_type_mapping = 2;
+    // Map of tag IDs to names
+    map<int32, string> tag_mapping = 3;
+    // Map of attribute name IDs to names
+    map<int32, string> attribute_name_mapping = 4;
+    // Map of attribute string value IDs to names
+    map<int32, string> attribute_string_value_mapping = 5;
+}
+
+// ChangeType indicates how a target changed across two revisions.
+enum ChangeType {
+    // A special defaul marker for invalid state
+    CHANGE_TYPE_INVALID = 0;
+    // A new target was added to the target graph
+    CHANGE_TYPE_NEW = 1;
+    // A target was deleted from the target graph
+    CHANGE_TYPE_DELETED = 2;
+    // A target existed before but was changed
+    CHANGE_TYPE_CHANGED = 3;
+    // A target existed before and was not changed
+    CHANGE_TYPE_UNCHANGED = 4;
+}
+
+// TargetWithChange wraps an optimized target with its change type.
+message TargetWithChange {
+    // The optimized target
+    OptimizedTarget target = 1;
+    // The change type
+    ChangeType change_type = 2;
+}
+
+// GetTargetGraphRequest is the request for the GetTargetGraph method, contaions the state of the Storage to analyze.
+message GetTargetGraphRequest {
+    // The Storage state to analyze
+    BuildDescription build_description = 1;
+    // Controls what payload details are included in responses; used to reduce payload size when full attribute set is not needed
+    OutputConfig output_config = 2;
+}
+
+// GetTargetGraphResponse is a stream response for the GetTargetGraph method.
+// It begins with a stream of optimized targets representing the target graph and metadata is the last item in the payload.
+message GetTargetGraphResponse {
+    oneof item {
+        // Optimized targets representing the target graph in a compact format
+        OptimizedTargets targets = 1;
+        // Metadata is the last item in the payload and contains id->name mappings, etc.
+        Metadata metadata = 2;
+    }
+}
+
+// GetChangedTargetsRequest is the request for the GetChangedTargets method, contains the state of the Storage to analyze.
+// Changed targets between base and target revisions are returned.
+message GetChangedTargetsRequest {
+    // The first revision spec
+    BuildDescription first_revision = 1;
+    // The second revision spec
+    BuildDescription second_revision = 2;
+    // Controls what payload details are included in responses; used to reduce payload size when full attribute set is not needed
+    OutputConfig output_config = 3;
+}
+
+// GetChangedTargetsResponse is the response for the GetChangedTargets method.
+// It begins with a stream of targets with their change type and metadata is the last item in the payload.
+message GetChangedTargetsResponse {
+    oneof item {
+        // A packet with optimized targets representing a portion of the target graph; all such packets represent the full target graph
+        OptimizedTargets targets = 1;
+        // Metadata is the last item in the payload and contains id->name mappings, etc. and used to reconstruct the full target graph with literal target names
+        Metadata metadata = 2;
+    }
+}
+
+// GetChangedServicesRequest is the request for the GetChangedServices method, contains the state of the Storage to analyze.
+// Changed services between base and target revisions are returned.
+message GetChangedServicesRequest {
+    // The base revision spec
+    BuildDescription first_revision = 1;
+    // The target revision spec
+    BuildDescription second_revision = 2;
+    // Controls what payload details are included in responses; used to reduce payload size when full attribute set is not needed
+    OutputConfig output_config = 3;
+}
+
+// ChangedService represents a changed service and its associated Bazel targets.
+message GetChangedServicesResponse {
+    // The name of the changed service
+    string service_name = 1;
+    // Literal full names of the changed targets belonging to the service
+    repeated string target_names = 2;
+}
+
+// GetChangedTargetGraphRequest is the request for the GetChangedTargetGraph method, contains the state of the Storage to analyze.
+// Changed target graph between base and target revisions are returned.
+message GetChangedTargetGraphRequest {
+    // The base revision spec
+    BuildDescription first_revision = 1;
+    // The target revision spec
+    BuildDescription second_revision = 2;
+    // Controls what payload details are included in responses; used to reduce payload size when full attribute set is not needed
+    OutputConfig output_config = 3;
+}
+
+// GetChangedTargetGraphResponse is the response for the GetChangedTargetGraph method.
+// It begins with a stream of targets with their change type and metadata is the last item in the payload.
+message GetChangedTargetGraphResponse {
+    oneof item {
+        // A packet with optimized targets representing a portion of the target graph; all such packets represent the full target graph
+        OptimizedTargets targets = 1;
+        // Metadata is the last item in the payload and contains id->name mappings, etc. and used to reconstruct the full target graph with literal target names
+        Metadata metadata = 2;
+    }
+}
+
+// Tango is the service for analyzing build target graphs and services. It is an abstraction over the underlying build system like Bazel,
+// enabling quick understanding of the dependencies between software building blocks and changes across source code revisions.
+service Tango {
+    // Return an optimized target graph for a specific state of the Storage
+    rpc GetTargetGraph(GetTargetGraphRequest) returns (stream GetTargetGraphResponse) {}
+
+    // Return a set of targets changed between two revisions
+    rpc GetChangedTargets(GetChangedTargetsRequest) returns (stream GetChangedTargetsResponse) {}
+
+    // Return a set of changed services between two revisions and their associated Bazel targets
+    rpc GetChangedServices(GetChangedServicesRequest) returns (stream GetChangedServicesResponse) {}
+
+    // Return a full target graph across two revisions with change indicator for each target. It differs from GetChangedTargets in that a full target graph can be constructed for either base or target revision.
+    rpc GetChangedTargetGraph(GetChangedTargetGraphRequest) returns (stream GetChangedTargetGraphResponse) {}
+}

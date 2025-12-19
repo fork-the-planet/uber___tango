@@ -1,0 +1,94 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+
+	"github.com/uber/tango/core/controller"
+	"github.com/uber/tango/core/git"
+	"github.com/uber/tango/core/repomanager"
+	"github.com/uber/tango/core/storage"
+	"github.com/uber/tango/orchestrator"
+	pb "github.com/uber/tango/tangopb"
+	"go.uber.org/yarpc"
+	"go.uber.org/yarpc/api/transport"
+	yarpcgrpc "go.uber.org/yarpc/transport/grpc"
+	"go.uber.org/zap"
+	"net"
+)
+
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to start: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	zl, _ := zap.NewDevelopment()
+	defer zl.Sync()
+	logger := zl.Sugar()
+
+	// In-memory storage
+	mem := storage.NewMemoryStorage()
+
+	// Repo manager and orchestrator (for now, these are mostly placeholders for local testing)
+	rootWS := filepath.Join(os.TempDir(), "tango-workspaces")
+	if err := os.MkdirAll(rootWS, 0o755); err != nil {
+		return fmt.Errorf("failed to create root workspace: %w", err)
+	}
+	// clean up the workspace on exit
+	defer os.RemoveAll(rootWS)
+	rm := repomanager.NewRepoManager(repomanager.Params{
+		Git:           git.New(rootWS),
+		Logger:        logger,
+		RootWorkspace: rootWS,
+	})
+	orch := orchestrator.NewNativeOrchestrator(orchestrator.Params{
+		Storage:     mem,
+		RepoManager: rm,
+		Logger:      logger,
+		GitFactory:  git.New,
+	})
+
+	// Controller (YARPC server implementation)
+	ctrl := controller.NewController(controller.Params{
+		Logger:       zl,
+		Storage:      mem,
+		Orchestrator: orch,
+	})
+
+	// YARPC transports and dispatcher
+	grpcTransport := yarpcgrpc.NewTransport()
+	port := "127.0.0.1:8081"
+	grpcListener, err := net.Listen("tcp", port)
+	if err != nil {
+		return fmt.Errorf("failed to listen on gRPC port: %w", err)
+	}
+
+	inbounds := []transport.Inbound{
+		grpcTransport.NewInbound(grpcListener),
+	}
+	dispatcher := yarpc.NewDispatcher(yarpc.Config{
+		Name:     "tango",
+		Inbounds: inbounds,
+	})
+	dispatcher.Register(pb.BuildTangoYARPCProcedures(ctrl))
+
+	if err := dispatcher.Start(); err != nil {
+		return fmt.Errorf("failed to start dispatcher: %w", err)
+	}
+	defer dispatcher.Stop()
+
+	logger.Infof("Tango server is running:")
+	logger.Infof("- gRPC inbound:  %s", port)
+	logger.Infof("Press Ctrl+C to stop.")
+	// Wait for interrupt
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	<-sigCh
+	return nil
+}

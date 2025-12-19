@@ -1,0 +1,45 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "controller",
+    srcs = [
+        "controller.go",
+        "getchangedservices.go",
+        "getchangedtargetgraph.go",
+        "getchangedtargets.go",
+        "gettargetgraph.go",
+    ],
+    importpath = "github.com/uber/tango/core/controller",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/common",
+        "//core/storage",
+        "//orchestrator",
+        "//tangopb",
+        "@org_uber_go_fx//:fx",
+        "@org_uber_go_multierr//:multierr",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "controller_test",
+    srcs = [
+        "getchangedtargets_test.go",
+        "gettargetgraph_test.go",
+    ],
+    embed = [":controller"],
+    deps = [
+        "//core/storage",
+        "//core/storage/storagemock",
+        "//orchestrator/orchestratormock",
+        "//tangopb",
+        "//tangopb/tangopbmock",
+        "@com_github_gogo_protobuf//io",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_mock//gomock",
+        "@org_uber_go_zap//:zap",
+        "@org_uber_go_zap//zaptest",
+    ],
+)

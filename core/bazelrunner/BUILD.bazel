@@ -1,0 +1,33 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "bazelrunner",
+    srcs = [
+        "graph.go",
+        "native.go",
+    ],
+    importpath = "github.com/uber/tango/core/bazelrunner",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/bazel",
+        "//core/git",
+        "//core/targethasher",
+        "//core/workspace",
+    ],
+)
+
+go_test(
+    name = "bazelrunner_test",
+    srcs = ["native_test.go"],
+    embed = [":bazelrunner"],
+    deps = [
+        "//core/bazel",
+        "//core/bazel/bazelmock",
+        "//core/git/gitmock",
+        "//core/workspace",
+        "@com_github_bazelbuild_buildtools//build_proto",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_mock//gomock",
+    ],
+)

@@ -1,0 +1,45 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "orchestrator",
+    srcs = [
+        "native_orchestrator.go",
+        "orchestrator.go",
+    ],
+    importpath = "github.com/uber/tango/orchestrator",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core/bazel",
+        "//core/bazelrunner",
+        "//core/common",
+        "//core/git",
+        "//core/repomanager",
+        "//core/storage",
+        "//core/targethasher",
+        "//core/workspace",
+        "//tangopb",
+        "@org_uber_go_zap//:zap",
+    ],
+)
+
+go_test(
+    name = "orchestrator_test",
+    srcs = ["native_orchestrator_test.go"],
+    embed = [":orchestrator"],
+    deps = [
+        "//core/bazelrunner/mock",
+        "//core/git",
+        "//core/git/gitmock",
+        "//core/repomanager/mock",
+        "//core/storage",
+        "//core/storage/storagemock",
+        "//core/targethasher",
+        "//core/workspace/workspacemock",
+        "//tangopb",
+        "@com_github_gogo_protobuf//io",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@org_uber_go_mock//gomock",
+        "@org_uber_go_zap//zaptest",
+    ],
+)
