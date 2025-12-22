@@ -12,6 +12,7 @@ go_library(
         "//core/bazel",
         "//core/bazelrunner",
         "//core/common",
+        "//core/config",
         "//core/git",
         "//core/repomanager",
         "//core/storage",
@@ -25,6 +26,7 @@ go_library(
 go_test(
     name = "orchestrator_test",
     srcs = ["native_orchestrator_test.go"],
+    data = glob(["testdata/**"]),
     embed = [":orchestrator"],
     deps = [
         "//core/bazelrunner/mock",

@@ -40,7 +40,8 @@ func TestNewBazelClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := NewBazelClient(tt.params)
+			client, err := NewBazelClient(tt.params)
+			require.NoError(t, err)
 			require.NotNil(t, client)
 			assert.Equal(t, tt.params.BazelCommand, client.bazelCommand)
 			assert.Equal(t, tt.params.WorkspacePath, client.workspacePath)
@@ -52,12 +53,13 @@ func TestNewBazelClient(t *testing.T) {
 }
 
 func TestNewBazelClient_WithNilExecCommand(t *testing.T) {
-	client := NewBazelClient(Params{
+	client, err := NewBazelClient(Params{
 		BazelCommand:  "bazel",
 		WorkspacePath: "/workspace",
 		EnvVarsMap:    map[string]string{"KEY": "value"},
 		Logger:        zap.NewNop().Sugar(),
 	})
+	require.NoError(t, err)
 	require.NotNil(t, client)
 	require.NotNil(t, client.execCommandContext)
 

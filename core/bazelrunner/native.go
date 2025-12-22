@@ -1,6 +1,7 @@
 package bazelrunner
 
 import (
+	"github.com/uber/tango/core/config"
 	"context"
 
 	"github.com/uber/tango/core/bazel"
@@ -10,32 +11,29 @@ import (
 )
 
 type nativeGraphRunner struct {
-	bazel                  bazel.Bazel
-	git                    git.Interface
-	excludeExternalTargets bool
-	bzlmodEnabled          bool
+	bazel  bazel.Bazel
+	git    git.Interface
+	config config.RepositoryConfig
 }
 
 type NativeGraphRunnerParams struct {
-	BazelClient            bazel.Bazel
-	GitClient              git.Interface
-	ExcludeExternalTargets bool
-	BzlmodEnabled          bool
+	BazelClient bazel.Bazel
+	GitClient   git.Interface
+	Config      config.RepositoryConfig
 }
 
 // graph runner takes in a bazel query request and computes the graph
 func NewNativeGraphRunner(p NativeGraphRunnerParams) GraphRunner {
 	return &nativeGraphRunner{
-		bazel:                  p.BazelClient,
-		git:                    p.GitClient,
-		excludeExternalTargets: p.ExcludeExternalTargets,
-		bzlmodEnabled:          p.BzlmodEnabled,
+		bazel:  p.BazelClient,
+		git:    p.GitClient,
+		config: p.Config,
 	}
 }
 
 func (g *nativeGraphRunner) Compute(ctx context.Context, ws workspace.Workspace) (targethasher.Result, error) {
 	query := "//external:all-targets + deps(//...:all-targets)"
-	if g.excludeExternalTargets {
+	if g.config.ExcludeExternalTargets {
 		query = "deps(//...:all-targets)"
 	}
 	queryResult, err := g.bazel.ExecuteQuery(ctx, &bazel.QueryRequest{
@@ -55,11 +53,10 @@ func (g *nativeGraphRunner) Compute(ctx context.Context, ws workspace.Workspace)
 	}
 	hashConfig := targethasher.HashConfig{
 		KnownSourceHashes: knownSourceHashes,
-		// TODO: Make this configurable
-		FullHashRepos: []string{},
-		ExcludedFiles: []string{},
+		FullHashRepos:     g.config.FullHashRepos,
+		ExcludedFiles:     g.config.ExcludedFiles,
 	}
-	res, err := targethasher.FromProto(ctx, queryResult.Result, ws.Path(), hashConfig, g.bzlmodEnabled)
+	res, err := targethasher.FromProto(ctx, queryResult.Result, ws.Path(), hashConfig, g.config.BzlmodEnabled)
 	if err != nil {
 		return targethasher.EmptyResult(), err
 	}

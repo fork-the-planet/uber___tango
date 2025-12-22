@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// TODO: Make this configurable
+	// default query timeout if not provided in config
 	_queryTimeout = 15 * time.Minute
 )
 
@@ -49,7 +49,7 @@ type Params struct {
 	QueryTimeout       time.Duration
 }
 
-func NewBazelClient(p Params) *BazelClient {
+func NewBazelClient(p Params) (*BazelClient, error) {
 	execCmd := p.ExecCommandContext
 	if execCmd == nil {
 		execCmd = func(ctx context.Context, name string, arg ...string) commander {
@@ -66,18 +66,29 @@ func NewBazelClient(p Params) *BazelClient {
 	if timeout == 0 {
 		timeout = _queryTimeout
 	}
+	bazelCommand, err := detectBazelExecutable(p.BazelCommand)
+	if err != nil {
+		p.Logger.Error("NewBazelClient: Error detecting bazel executable", zap.Error(err))
+		return nil, err
+	}
 	return &BazelClient{
 		workspacePath:      p.WorkspacePath,
 		envVarsMap:         p.EnvVarsMap,
-		bazelCommand:       p.BazelCommand,
+		bazelCommand:       bazelCommand,
 		logger:             p.Logger,
 		execCommandContext: execCmd,
 		queryTimeout:       timeout,
-	}
+	}, nil
 }
 
-func DetectBazelExecutable() (string, error) {
-	// TODO: read from config file to get the bazel executable path. Fallback to the following logic if not provided.
+// detectBazelExecutable detects the bazel executable path.
+// If bazelCommand is provided, it returns the bazelCommand.
+// Otherwise, it looks for the bazel executable in the PATH.
+// If the bazel executable is not found, it returns an error.
+func detectBazelExecutable(bazelCommand string) (string, error) {
+	if bazelCommand != "" {
+		return bazelCommand, nil
+	}
 	// Most correct: honor Bazelisk wrapper env vars
 	if p, ok := bazelFromEnv(); ok {
 		return p, nil

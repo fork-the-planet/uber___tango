@@ -8,12 +8,14 @@ import (
 	"github.com/uber/tango/core/bazel"
 	"github.com/uber/tango/core/bazelrunner"
 	"github.com/uber/tango/core/common"
+	"github.com/uber/tango/core/config"
 	"github.com/uber/tango/core/git"
 	"github.com/uber/tango/core/repomanager"
 	"github.com/uber/tango/core/storage"
 	"github.com/uber/tango/core/targethasher"
 	"github.com/uber/tango/core/workspace"
 	"go.uber.org/zap"
+	"time"
 )
 
 // nativeOrchestrator implements native version of Orchestrator
@@ -22,32 +24,41 @@ type nativeOrchestrator struct {
 	repoManager repomanager.RepoManager
 	logger      *zap.SugaredLogger
 	// gitFactory allows injecting a git.Interface constructor for testing
-	gitFactory  func(directory string) git.Interface
-	GraphRunner bazelrunner.GraphRunner
+	gitFactory     func(directory string) git.Interface
+	graphRunner    bazelrunner.GraphRunner
+	configFilePath string
 }
 
 type Params struct {
-	Storage     storage.Storage
-	RepoManager repomanager.RepoManager
-	Logger      *zap.SugaredLogger
-	GitFactory  func(directory string) git.Interface
-	GraphRunner bazelrunner.GraphRunner
+	Storage        storage.Storage
+	RepoManager    repomanager.RepoManager
+	Logger         *zap.SugaredLogger
+	GitFactory     func(directory string) git.Interface
+	GraphRunner    bazelrunner.GraphRunner
+	ConfigFilePath string
 }
 
 // NewNativeOrchestrator creates a new native orchestrator with the given parameters.
 func NewNativeOrchestrator(p Params) Orchestrator {
 	return &nativeOrchestrator{
-		storage:     p.Storage,
-		repoManager: p.RepoManager,
-		logger:      p.Logger,
-		gitFactory:  p.GitFactory,
-		GraphRunner: p.GraphRunner,
+		storage:        p.Storage,
+		repoManager:    p.RepoManager,
+		logger:         p.Logger,
+		gitFactory:     p.GitFactory,
+		graphRunner:    p.GraphRunner,
+		configFilePath: p.ConfigFilePath,
 	}
 }
 
 // GetTargetGraph is used to compute the target graph locally.
 // It leases a workspace, checks out the base revision, applies the change requests, and computes the target graph.
 func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTargetGraphParam) (storage.GraphReader, error) {
+	// parse the config file
+	config, err := config.ParseConfig(b.configFilePath)
+	if err != nil {
+		b.logger.Error("getGraph: Error parsing config file", zap.String("configFilePath", b.configFilePath), zap.Error(err))
+		return nil, err
+	}
 	ws, err := b.repoManager.Lease(ctx, *param.Req.BuildDescription)
 	if err != nil {
 		return nil, err
@@ -101,24 +112,23 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 		if storage.IsNotFound(err) {
 			b.logger.Info("getGraph: treehash not found. Computing the target graph.", zap.Any("request build description", param.Req.BuildDescription), zap.Error(err))
 			// Compute the target graph and store it in storage.
-			runner := b.GraphRunner
+			runner := b.graphRunner
 			if runner == nil {
-				bazelCommand, err := bazel.DetectBazelExecutable()
+				client, err := bazel.NewBazelClient(bazel.Params{
+					WorkspacePath: ws.Path(),
+					Logger:        b.logger,
+					BazelCommand:  config.BazelCommand,
+					QueryTimeout:  time.Duration(config.QueryTimeout) * time.Second,
+				})
 				if err != nil {
-					b.logger.Error("getGraph: DetectBazelExecutable failed", zap.Error(err))
+					b.logger.Error("getGraph: Error creating bazel client", zap.Error(err))
 					return nil, err
 				}
 				// Use default native graph runner
 				runner = bazelrunner.NewNativeGraphRunner(bazelrunner.NativeGraphRunnerParams{
-					BazelClient: bazel.NewBazelClient(bazel.Params{
-						WorkspacePath: ws.Path(),
-						Logger:        b.logger,
-						BazelCommand:  bazelCommand,
-					}),
-					// TODO: Make these configurable
-					ExcludeExternalTargets: true,
-					BzlmodEnabled:          true,
-					GitClient:              gitModule,
+					BazelClient: client,
+					GitClient:   gitModule,
+					Config:      *config,
 				})
 			}
 			result, err := runner.Compute(ctx, ws)

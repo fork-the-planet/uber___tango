@@ -42,7 +42,7 @@ func TestExecuteQuery_Success(t *testing.T) {
 		mockCmd.EXPECT().Start().Return(nil),
 		mockCmd.EXPECT().Wait().Return(nil),
 	)
-	client := NewBazelClient(Params{
+	client, err := NewBazelClient(Params{
 		BazelCommand:  "bazel",
 		WorkspacePath: "/tmp/test",
 		EnvVarsMap:    map[string]string{},
@@ -86,7 +86,7 @@ func TestExecuteQuery_WithStartupOptions(t *testing.T) {
 		mockCmd.EXPECT().Start().Return(nil),
 		mockCmd.EXPECT().Wait().Return(nil),
 	)
-	client := NewBazelClient(Params{
+	client, err := NewBazelClient(Params{
 		BazelCommand:  "bazel",
 		WorkspacePath: "/tmp/test",
 		EnvVarsMap:    map[string]string{},
@@ -96,7 +96,7 @@ func TestExecuteQuery_WithStartupOptions(t *testing.T) {
 			return mockCmd
 		},
 	})
-
+	require.NoError(t, err)
 	resp, err := client.ExecuteQuery(context.Background(), &QueryRequest{
 		Query:          "//...",
 		StartupOptions: []string{"--bazelrc=/custom/.bazelrc", "--output_base=/tmp/bazel"},
@@ -132,12 +132,12 @@ func TestexecuteQueryInternal_ContextTimeout(t *testing.T) {
 		mockCmd.EXPECT().Wait().Return(context.DeadlineExceeded),
 	)
 
-	client := NewBazelClient(Params{
+	client, err := NewBazelClient(Params{
 		BazelCommand:  "bazel",
-        WorkspacePath: "/tmp/test",
-        Logger:        zap.NewNop().Sugar(),
+		WorkspacePath: "/tmp/test",
+		Logger:        zap.NewNop().Sugar(),
 		EnvVarsMap:    map[string]string{},
-        QueryTimeout:  1 * time.Nanosecond, // Induce timeout immediately
+		QueryTimeout:  1 * time.Nanosecond, // Induce timeout immediately
 
 		ExecCommandContext: func(ctx context.Context, name string, arg ...string) commander {
 			// This goroutine simulates the OS/exec.Cmd behavior:
@@ -156,6 +156,7 @@ func TestexecuteQueryInternal_ContextTimeout(t *testing.T) {
 			return mockCmd
 		},
 	})
+	require.NoError(t, err)
 	result, err := client.executeQueryInternal(context.Background(), "//...", nil)
 	require.Nil(t, result)
 	assert.Contains(t, err.Error(), "context deadline exceeded")
@@ -215,7 +216,7 @@ func TestexecuteQueryInternal_Failures(t *testing.T) {
 			mockCmd := commandermock.NewMockcommander(ctrl)
 			tt.setupMock(mockCmd)
 
-			client := NewBazelClient(Params{
+			client, err := NewBazelClient(Params{
 				BazelCommand:  "bazel",
 				WorkspacePath: "/tmp/test",
 				EnvVarsMap:    map[string]string{},
@@ -224,6 +225,7 @@ func TestexecuteQueryInternal_Failures(t *testing.T) {
 					return mockCmd
 				},
 			})
+			require.NoError(t, err)
 			result, err := client.executeQueryInternal(context.Background(), "//...", nil)
 			require.Error(t, err)
 			if tt.expectNilResult {
@@ -243,7 +245,7 @@ func TestExecuteQuery_ErrorCase(t *testing.T) {
 
 	mockCmd.EXPECT().StdoutPipe().Return(nil, errors.New("stdout pipe failed"))
 
-	client := NewBazelClient(Params{
+	client, err := NewBazelClient(Params{
 		BazelCommand:  "bazel",
 		WorkspacePath: "/tmp/test",
 		EnvVarsMap:    map[string]string{},
