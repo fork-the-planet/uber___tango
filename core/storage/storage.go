@@ -36,7 +36,7 @@ type UploadRequest struct {
 	Reader io.Reader
 }
 
-// Storage is an abstract interface for remote data storage, the implementation may be Amazon S3, Google Cloud Storage, etc.
+// Storage is an abstract interface for remote data storage.
 type Storage interface {
 	// Get downloads a blob from the storage. Return NotFoundError when the blob is not found.
 	Get(ctx context.Context, req DownloadRequest) (*DownloadResponse, error)

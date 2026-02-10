@@ -2,22 +2,24 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
+	"github.com/uber/tango/core/config"
 	"github.com/uber/tango/core/controller"
 	"github.com/uber/tango/core/git"
 	"github.com/uber/tango/core/repomanager"
 	"github.com/uber/tango/core/storage"
+	"github.com/uber/tango/core/storage/disk"
 	"github.com/uber/tango/orchestrator"
 	pb "github.com/uber/tango/tangopb"
 	"go.uber.org/yarpc"
 	"go.uber.org/yarpc/api/transport"
 	yarpcgrpc "go.uber.org/yarpc/transport/grpc"
 	"go.uber.org/zap"
-	"net"
 )
 
 func main() {
@@ -32,34 +34,42 @@ func run() error {
 	defer zl.Sync()
 	logger := zl.Sugar()
 
-	// In-memory storage
-	mem := storage.NewMemoryStorage()
+	configFilePath := filepath.Join("example", "tango-config.yaml")
+	cfg, err := config.Parse(configFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to parse config: %w", err)
+	}
 
-	// Repo manager and orchestrator (for now, these are mostly placeholders for local testing)
+	store, err := newStorage(cfg.Storage)
+	if err != nil {
+		return fmt.Errorf("failed to create storage: %w", err)
+	}
+	logger.Infof("Using storage type: %s", cfg.Storage.Type)
+
+	// Repo manager and orchestrator
 	rootWS := filepath.Join(os.TempDir(), "tango-workspaces")
 	if err := os.MkdirAll(rootWS, 0o755); err != nil {
 		return fmt.Errorf("failed to create root workspace: %w", err)
 	}
-	// clean up the workspace on exit
 	defer os.RemoveAll(rootWS)
+
 	rm := repomanager.NewRepoManager(repomanager.Params{
 		Git:           git.New(rootWS),
 		Logger:        logger,
 		RootWorkspace: rootWS,
 	})
-	configFilePath := filepath.Join("example", "tango-config.yaml")
 	orch := orchestrator.NewNativeOrchestrator(orchestrator.Params{
-		Storage:     mem,
-		RepoManager: rm,
-		Logger:      logger,
-		GitFactory:  git.New,
+		Storage:        store,
+		RepoManager:    rm,
+		Logger:         logger,
+		GitFactory:     git.New,
 		ConfigFilePath: configFilePath,
 	})
 
 	// Controller (YARPC server implementation)
 	ctrl := controller.NewController(controller.Params{
 		Logger:       zl,
-		Storage:      mem,
+		Storage:      store,
 		Orchestrator: orch,
 	})
 
@@ -93,4 +103,22 @@ func run() error {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
 	return nil
+}
+
+// newStorage creates a Storage implementation based on the provided configuration.
+func newStorage(cfg config.StorageConfig) (storage.Storage, error) {
+	switch cfg.Type {
+	case config.StorageTypeMemory, "":
+		return storage.NewMemoryStorage(), nil
+	case config.StorageTypeDisk:
+		if cfg.Disk == nil {
+			return nil, fmt.Errorf("disk storage requires 'disk' configuration")
+		}
+		if cfg.Disk.RootPath == "" {
+			return nil, fmt.Errorf("disk storage requires 'root_path' to be set")
+		}
+		return disk.New(cfg.Disk.RootPath)
+	default:
+		return nil, fmt.Errorf("unsupported storage type: %q", cfg.Type)
+	}
 }
