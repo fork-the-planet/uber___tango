@@ -10,6 +10,11 @@ import (
 	"github.com/uber/tango/tangopb"
 )
 
+const (
+	// DefaultTargetChunkSize is the default number of targets per message chunk, used for streaming large target graphs.
+	DefaultTargetChunkSize = 1000
+)
+
 // ToShortRemote returns the short remote name given a git ssh remote string.
 // For example, "git@github:uber/tango" will return "uber/tango".
 func ToShortRemote(remote string) string {
@@ -36,8 +41,6 @@ func getReqsBase64(requestURLs []string) string {
 	}
 	return strings.Join(encodedURLs, "-")
 }
-
-
 
 // ResultToGetTargetGraphResponse converts a Result to a GetTargetGraphResponse
 func ResultToGetTargetGraphResponse(result targethasher.Result) ([]*tangopb.GetTargetGraphResponse, error) {
@@ -122,25 +125,59 @@ func ResultToGetTargetGraphResponse(result targethasher.Result) ([]*tangopb.GetT
 	attrNameIDToName := attrNameMapper.Invert()
 	attrStrValIDToVal := attrStrValMapper.Invert()
 
-	// Assemble final OptimizedTargets
-	return []*tangopb.GetTargetGraphResponse{
-		{
+	// chunk targets into multiple messages for streaming
+	responses := chunkTargets(optimizedTargets, DefaultTargetChunkSize)
+	responses = append(responses, &tangopb.GetTargetGraphResponse{
+		Item: &tangopb.GetTargetGraphResponse_Metadata{
+			Metadata: &tangopb.Metadata{
+				TargetIdMapping:             targetIDToName,
+				RuleTypeMapping:             ruleTypeIDToName,
+				TagMapping:                  tagIDToName,
+				AttributeNameMapping:        attrNameIDToName,
+				AttributeStringValueMapping: attrStrValIDToVal,
+			},
+		},
+	})
+
+	return responses, nil
+}
+
+func chunkTargets(targets []*tangopb.OptimizedTarget, chunkSize int) []*tangopb.GetTargetGraphResponse {
+	if chunkSize <= 0 {
+		chunkSize = DefaultTargetChunkSize
+	}
+
+	// at least one chunk
+	numChunks := max(1, (len(targets)+chunkSize-1)/chunkSize)
+
+	responses := make([]*tangopb.GetTargetGraphResponse, 0, numChunks)
+
+	for i := 0; i < len(targets); i += chunkSize {
+		end := i + chunkSize
+		if end > len(targets) {
+			end = len(targets)
+		}
+
+		chunk := targets[i:end]
+		responses = append(responses, &tangopb.GetTargetGraphResponse{
 			Item: &tangopb.GetTargetGraphResponse_Targets{
 				Targets: &tangopb.OptimizedTargets{
-					Targets: optimizedTargets,
+					Targets: chunk,
 				},
 			},
-		},
-		{
-			Item: &tangopb.GetTargetGraphResponse_Metadata{
-				Metadata: &tangopb.Metadata{
-					TargetIdMapping:             targetIDToName,
-					RuleTypeMapping:             ruleTypeIDToName,
-					TagMapping:                  tagIDToName,
-					AttributeNameMapping:        attrNameIDToName,
-					AttributeStringValueMapping: attrStrValIDToVal,
+		})
+	}
+
+	// Handle empty targets case
+	if len(responses) == 0 {
+		responses = append(responses, &tangopb.GetTargetGraphResponse{
+			Item: &tangopb.GetTargetGraphResponse_Targets{
+				Targets: &tangopb.OptimizedTargets{
+					Targets: []*tangopb.OptimizedTarget{},
 				},
 			},
-		},
-	}, nil
+		})
+	}
+
+	return responses
 }
