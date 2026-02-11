@@ -2,9 +2,9 @@ package bazelrunner
 
 import (
 	"context"
-	"github.com/uber/tango/core/config"
 
 	"github.com/uber/tango/core/bazel"
+	"github.com/uber/tango/core/config"
 	"github.com/uber/tango/core/git"
 	"github.com/uber/tango/core/targethasher"
 	"github.com/uber/tango/core/workspace"
@@ -56,8 +56,9 @@ func (g *nativeGraphRunner) Compute(ctx context.Context, ws workspace.Workspace)
 		KnownSourceHashes: knownSourceHashes,
 		FullHashRepos:     g.config.FullHashRepos,
 		ExcludedFiles:     g.config.ExcludedFiles,
+		UseBzlmod:         g.config.BzlmodEnabled,
 	}
-	// TODO: add bzlmod support
+
 	res, err := targethasher.FromProto(ctx, queryResult.Result, ws.Path(), hashConfig)
 	if err != nil {
 		return targethasher.EmptyResult(), err

@@ -47,6 +47,7 @@ type HashConfig struct {
 	// accurate, but slower.
 	FullHashRepos []string
 	ExcludedFiles []string // TODO: rename to ExcludedRegex
+	UseBzlmod     bool
 }
 
 // Target contains information about the hash for a single target
@@ -118,12 +119,12 @@ func FromProto(ctx context.Context, r *buildpb.QueryResult, workspaceroot string
 	return fromProto(ctx, r, &diskHashHelper{
 		workspaceroot:   workspaceroot,
 		knownFileHashes: hashConfig.KnownSourceHashes,
-	}, workspaceroot, fullHashRepos, excludedRegex)
+	}, workspaceroot, fullHashRepos, excludedRegex, hashConfig.UseBzlmod)
 }
 
 // FromProtoNoHash calculates a DAG graph based on a query result. It does not calculate hashes for targets.
 func FromProtoNoHash(ctx context.Context, r *buildpb.QueryResult) (Result, error) {
-	return fromProto(ctx, r, &noOpHasher{}, "", set.NewSet[string](), nil)
+	return fromProto(ctx, r, &noOpHasher{}, "", set.NewSet[string](), nil, false)
 }
 
 // for external targets, url and urls attributes could cause non-deterministic hash values,
@@ -142,6 +143,7 @@ func removeURLAttrs(t *buildpb.Target) {
 
 	oldAttrs := t.GetRule().GetAttribute()
 	var willCheckContent bool
+
 	for _, attr := range oldAttrs {
 		if attr.GetName() == sha256Attr || attr.GetName() == integrityAttr {
 			willCheckContent = true
@@ -273,6 +275,7 @@ func HashExternalTargets(ctx context.Context, r *buildpb.QueryResult, targets ma
 		FullHashRepos: fullHashRepos,
 		// we should not exclude anything for external repository rules
 		ExcludedRegex: nil,
+		UseBzlmod:     false, // HashExternalTargets is only called for non-Bzlmod
 	}
 	for name, target := range targets {
 		if target.RuleType == ExternalRuleType {
@@ -319,7 +322,7 @@ func GetTopologicalRootsAndIdentifyBuildableRoots(targets map[string]*Target) []
 	return roots
 }
 
-func fromProto(ctx context.Context, r *buildpb.QueryResult, hasher SourceHasher, workspaceroot string, fullHashRepos set.Set[string], excludedRegex []*regexp.Regexp) (Result, error) {
+func fromProto(ctx context.Context, r *buildpb.QueryResult, hasher SourceHasher, workspaceroot string, fullHashRepos set.Set[string], excludedRegex []*regexp.Regexp, useBzlmod bool) (Result, error) {
 	warns := make(map[string]error)
 	// Build target graph with dependencies, but without hash and root information.
 	targets, err := GetInternalTargetsWithoutHashAndRootInfo(ctx, r)
@@ -328,8 +331,11 @@ func fromProto(ctx context.Context, r *buildpb.QueryResult, hasher SourceHasher,
 	}
 
 	// add external rule targets (//external:*) to the same map and hash them
-	if err := HashExternalTargets(ctx, r, targets, hasher, workspaceroot, fullHashRepos, warns); err != nil {
-		return EmptyResult(), err
+	// no need for bzlmod because there's no //external:* rules, we will hash external source as is
+	if !useBzlmod {
+		if err := HashExternalTargets(ctx, r, targets, hasher, workspaceroot, fullHashRepos, warns); err != nil {
+			return EmptyResult(), err
+		}
 	}
 	// get topological roots and update buildable roots info
 	roots := GetTopologicalRootsAndIdentifyBuildableRoots(targets)
@@ -344,7 +350,9 @@ func fromProto(ctx context.Context, r *buildpb.QueryResult, hasher SourceHasher,
 		WorkspaceRoot: workspaceroot,
 		FullHashRepos: fullHashRepos,
 		ExcludedRegex: excludedRegex,
+		UseBzlmod:     useBzlmod,
 	}
+
 	for _, name := range roots {
 		hashParam.TargetName = name
 		if _, err := HashRecursively(ctx, hashParam); err != nil {
@@ -392,7 +400,6 @@ func fromProto(ctx context.Context, r *buildpb.QueryResult, hasher SourceHasher,
 			}
 		}
 	}
-
 	return Result{
 		TargetNames: targetNames,
 		Targets:     targets,
@@ -448,6 +455,7 @@ type HashParam struct {
 	WorkspaceRoot string
 	FullHashRepos set.Set[string]
 	ExcludedRegex []*regexp.Regexp
+	UseBzlmod     bool
 }
 
 // HashRecursively calculates hash for all of the target nodes in the target graph and updates Hash property for each
@@ -469,9 +477,10 @@ func HashRecursively(ctx context.Context, p HashParam) ([]byte, error) {
 
 	var target *Target
 	l := labels.Parse(p.TargetName)
-	// For external targets like @bazel_tools//tools/genrule:genrule-setup.sh,
-	// map the hash to //external:bazel_tools's hash (unless it's in FullHashRepos)
-	if isExternalTarget(p.TargetName) && l.Repository != "" && !p.FullHashRepos.Contains(l.Repository) {
+	// For external targets like @gazelle//language/proto:fix.go,
+	// map the hash to //external:gazelle's hash (unless it's in FullHashRepos)
+	// no need to do this for Bzlmod, external rules are handled differently with @@repo// syntax
+	if !p.UseBzlmod && isExternalTarget(p.TargetName) && l.Repository != "" && !p.FullHashRepos.Contains(l.Repository) {
 		translatedExternalTargetName := externalTargetForRule(p.TargetName)
 		if t, hasExternalRule := p.Targets[translatedExternalTargetName]; hasExternalRule {
 			target = t
@@ -646,22 +655,6 @@ func isExternalWorkspaceType(t *buildpb.Target) bool {
 	default:
 		return false
 	}
-}
-
-func isWorkspaceRootRule(t *buildpb.Target, rootRulePrefixes []string) bool {
-	if *t.Type == buildpb.Target_RULE {
-		return hasAnyPrefix(t, rootRulePrefixes)
-	}
-	return false
-}
-
-func hasAnyPrefix(t *buildpb.Target, rootRulePrefixes []string) bool {
-	for _, rootPrefix := range rootRulePrefixes {
-		if strings.HasPrefix(t.Rule.GetName(), rootPrefix) {
-			return true
-		}
-	}
-	return false
 }
 
 func isExcluded(targetName string, excludedRegex []*regexp.Regexp) bool {
