@@ -2,9 +2,8 @@ package bazel
 
 import (
 	"bufio"
-	"context"
 	"io"
-
+	"context"
 	buildpb "github.com/bazelbuild/buildtools/build_proto"
 	"google.golang.org/protobuf/encoding/protodelim"
 )
@@ -32,7 +31,7 @@ func streamAndParseTargets(ctx context.Context, src io.Reader, dst io.Writer) (*
 	done := make(chan result, 1)
 
 	go func() {
-		queryResult, err := getQueryResult(src, dst)
+		queryResult, err := getQueryResult(ctx,src, dst)
 		done <- result{queryResult: queryResult, err: err}
 	}()
 
@@ -44,25 +43,32 @@ func streamAndParseTargets(ctx context.Context, src io.Reader, dst io.Writer) (*
 	}
 }
 
+
+
 // getQueryResult reads a QueryResult containing targets from the stream and returns it.
-func getQueryResult(src io.Reader, dst io.Writer) (*buildpb.QueryResult, error) {
+func getQueryResult(ctx context.Context, src io.Reader, dst io.Writer) (*buildpb.QueryResult, error) {
 	result := &buildpb.QueryResult{
 		Target: make([]*buildpb.Target, 0),
 	}
 	tr := io.TeeReader(src, dst)
 	br := bufio.NewReader(tr)
-
+	unmarshalOpts := protodelim.UnmarshalOptions{
+		MaxSize: 64 * 1024 * 1024, // 64MB limit
+	}
+	var parseErr error
 	for {
 		var target buildpb.Target
-		err := protodelim.UnmarshalFrom(br, &target)
+		err := unmarshalOpts.UnmarshalFrom(br, &target)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return result, err
+			parseErr = err
+			// Continue reading - critical to prevent Bazel from blocking on write
+			continue
 		}
 		result.Target = append(result.Target, &target)
 	}
 
-	return result, nil
+	return result, parseErr
 }

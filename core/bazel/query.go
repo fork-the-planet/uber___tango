@@ -70,9 +70,8 @@ func (b *BazelClient) executeQueryInternal(ctx context.Context, query string, st
 	g.Go(func() error {
 		return streamOutput(gCtx, stderr, &stderrBuf)
 	})
-
-	streamErr := g.Wait()
 	waitErr := cmd.Wait()
+	streamErr := g.Wait()
 	// The command itself failed.
 	if waitErr != nil {
 		b.logger.Error("Bazel query failed failed: %v", waitErr)
