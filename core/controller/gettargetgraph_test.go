@@ -40,8 +40,8 @@ func TestGetTargetGraph_CacheMiss_NoSend(t *testing.T) {
 			Remote:  "repo:go-code",
 			BaseSha: "sha",
 			Requests: []*pb.Request{
-				{Url: "github://repo/1"},
-				{Url: "github://repo/2"},
+				{Url: "github://repo/1", Commit: "abc111"},
+				{Url: "github://repo/2", Commit: "abc222"},
 			},
 		},
 	}
@@ -65,8 +65,8 @@ func TestGetTargetGraph_StorageError_Propagates(t *testing.T) {
 			Remote:  "repo:go-code",
 			BaseSha: "sha",
 			Requests: []*pb.Request{
-				{Url: "github://repo/1"},
-				{Url: "github://repo/2"},
+				{Url: "github://repo/1", Commit: "abc111"},
+				{Url: "github://repo/2", Commit: "abc222"},
 			},
 		},
 	}, stream)
@@ -91,8 +91,8 @@ func TestGetTargetGraph_DecodeError_ReturnsError(t *testing.T) {
 			Remote:  "repo:go-code",
 			BaseSha: "sha",
 			Requests: []*pb.Request{
-				{Url: "github://repo/1"},
-				{Url: "github://repo/2"},
+				{Url: "github://repo/1", Commit: "abc111"},
+				{Url: "github://repo/2", Commit: "abc222"},
 			},
 		},
 	}, stream)
@@ -124,8 +124,8 @@ func TestGetTargetGraph_SendsWhenItemPresent(t *testing.T) {
 			Remote:  "repo:go-code",
 			BaseSha: "sha",
 			Requests: []*pb.Request{
-				{Url: "github://repo/1"},
-				{Url: "github://repo/2"},
+				{Url: "github://repo/1", Commit: "abc111"},
+				{Url: "github://repo/2", Commit: "abc222"},
 			},
 		},
 	}, stream)
@@ -145,8 +145,8 @@ func TestGetTargetGraph_BuildDescriptionMissingRequiredFields_ReturnsError(t *te
 		BuildDescription: &pb.BuildDescription{
 			Remote: "repo:go-code",
 			Requests: []*pb.Request{
-				{Url: "github://repo/1"},
-				{Url: "github://repo/2"},
+				{Url: "github://repo/1", Commit: "abc111"},
+				{Url: "github://repo/2", Commit: "abc222"},
 			},
 		},
 	}, stream)
@@ -165,6 +165,7 @@ func TestGetTargetGraph_MissingBuildDescription_ReturnsError(t *testing.T) {
 	err := c.GetTargetGraph(&pb.GetTargetGraphRequest{}, stream)
 	assert.Error(t, err)
 }
+
 
 // New coverage: Storage returns NotFound on treehash path -> orchestrator is called to compute the target graph.
 func TestGetTargetGraph_TreehashNotFound_NoError(t *testing.T) {

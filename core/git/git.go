@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -26,6 +27,7 @@ type Interface interface {
 	Clone(ctx context.Context, target, destination string, options ...string) error
 	ApplyPatch(ctx context.Context, patch []byte) error
 	RevParse(ctx context.Context, ref string) (string, error)
+	IsAncestor(ctx context.Context, ancestorRef, descendantRef string) (bool, error)
 	Commit(ctx context.Context, message string, options ...string) error
 	SubmoduleUpdate(ctx context.Context) error
 	FileHashes(ctx context.Context, ref string) (map[string][]byte, error)
@@ -92,6 +94,21 @@ func (c *impl) RevParse(ctx context.Context, ref string) (string, error) {
 		return "", err
 	}
 	return string(out), nil
+}
+
+// Log returns up to limit commit SHAs reachable from ref, most recent first.
+func (c *impl) IsAncestor(ctx context.Context, ancestorRef, descendantRef string) (bool, error) {
+	_, err := c.runner.output(ctx, c.directory, "git", "merge-base", "--is-ancestor", ancestorRef, descendantRef)
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			if exitErr.ExitCode() == 1 {
+				return false, nil
+			}
+			// an exit code other than 1 indicates an error
+			return false, fmt.Errorf("check if ref %s is ancestor of %s: %w", ancestorRef, descendantRef, err)
+		}
+	}
+	return true, nil
 }
 
 // Commit commits the changes to the repository.

@@ -165,6 +165,21 @@ func (mr *MockInterfaceMockRecorder) FileHashes(ctx, ref any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FileHashes", reflect.TypeOf((*MockInterface)(nil).FileHashes), ctx, ref)
 }
 
+// IsAncestor mocks base method.
+func (m *MockInterface) IsAncestor(ctx context.Context, ancestorRef, descendantRef string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsAncestor", ctx, ancestorRef, descendantRef)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// IsAncestor indicates an expected call of IsAncestor.
+func (mr *MockInterfaceMockRecorder) IsAncestor(ctx, ancestorRef, descendantRef any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAncestor", reflect.TypeOf((*MockInterface)(nil).IsAncestor), ctx, ancestorRef, descendantRef)
+}
+
 // RevParse mocks base method.
 func (m *MockInterface) RevParse(ctx context.Context, ref string) (string, error) {
 	m.ctrl.T.Helper()
