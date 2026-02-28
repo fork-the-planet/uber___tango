@@ -209,6 +209,7 @@ func (c *controller) compareTargetGraphs(ctx context.Context, firstGraph, second
 					secondMetadata.GetAttributeStringValueMapping(),
 					getTargetId, getRuleTypeId, getTagId, getAttrNameId, getAttrValId,
 				),
+				Distance: getDefaultDistance(outputConfig, true),
 			}
 			continue
 		}
@@ -252,6 +253,7 @@ func (c *controller) compareTargetGraphs(ctx context.Context, firstGraph, second
 			ChangeType: initial,
 			OldTarget:  oldTarget,
 			NewTarget:  newTarget,
+			Distance:   getDefaultDistance(outputConfig, false),
 		}
 	}
 
@@ -290,7 +292,12 @@ func (c *controller) compareTargetGraphs(ctx context.Context, firstGraph, second
 	}
 
 	// Compute BFS distances from CHANGE_TYPE_DIRECT targets through the dependency graph.
-	computeDistances(c.logger, changedByName, secondByName, secondMetadata)
+	if outputConfig.GetComputeDistances() {
+		computeDistances(c.logger, changedByName, secondByName, secondMetadata)
+	}
+
+	// TODO: https://github.com/uber/tango/issues/34
+	// only return changed targets changed within x distance from a direct target
 
 	// Collect changed targets.
 	changed := make([]*pb.ChangedTarget, 0, len(changedByName))
@@ -661,4 +668,16 @@ func validateGetChangedTargetsRequest(request *pb.GetChangedTargetsRequest) erro
 		return errors.New("first and second revision must have the same remote")
 	}
 	return nil
+}
+
+func getDefaultDistance(outputConfig *pb.OutputConfig, forNewTarget bool) int32 {
+	if !outputConfig.GetComputeDistances() {
+		return -1
+	}
+	// New targets are always CHANGE_TYPE_NEW → distance 0.
+	// All others start at -1; computeDistances will fill them in.
+	if forNewTarget {
+		return 0
+	}
+	return -1
 }
