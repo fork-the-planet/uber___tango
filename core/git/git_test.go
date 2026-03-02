@@ -3,10 +3,11 @@ package git
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type runnerCall struct {
@@ -45,7 +46,7 @@ func TestClone_usesRunnerWithDirAndArgs(t *testing.T) {
 	require.Equal(t, "run", c.kind)
 	require.Equal(t, "/repo", c.dir)
 	require.Equal(t, "git", c.name)
-	assert.EqualValues(t, []string{"clone", "target", "/dest", "--depth=1"}, c.args)
+	assert.EqualValues(t, []string{"clone", "--depth=1", "target", "/dest"}, c.args)
 }
 
 func TestCheckout_usesDashCAndRunner(t *testing.T) {
