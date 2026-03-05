@@ -24,8 +24,22 @@ import (
 
 // Config is the root configuration structure.
 type Config struct {
-	Repository RepositoryConfig `yaml:"repository"`
-	Storage    StorageConfig    `yaml:"storage"`
+	Repository []RepositoryConfig `yaml:"repository"`
+	Storage    StorageConfig      `yaml:"storage"`
+	Service    ServiceConfig      `yaml:"service"`
+
+	// repositoryByRemote is built at parse time for O(1) lookup.
+	repositoryByRemote map[string]*RepositoryConfig
+}
+
+// GetRepositoryConfig returns the RepositoryConfig for the given remote URL.
+// Returns a zero-value config and false if the remote is not found.
+func (c *Config) GetRepositoryConfig(remote string) (RepositoryConfig, bool) {
+	repo, ok := c.repositoryByRemote[remote]
+	if !ok {
+		return RepositoryConfig{}, false
+	}
+	return *repo, true
 }
 
 // Parse parses the full configuration from the given file path.
@@ -42,17 +56,28 @@ func Parse(configFilePath string) (*Config, error) {
 	if config.Storage.Type == "" {
 		config.Storage.Type = StorageTypeMemory
 	}
-	if config.Repository.WorkerRootPath != "" && config.Repository.RepoManagerClonePath == "" {
-		return nil, fmt.Errorf("repository.repo_manager_clone_path must be set when worker_root_path is specified")
+	if config.Service.WorkerRootPath != "" && config.Service.RepoManagerClonePath == "" {
+		return nil, fmt.Errorf("service.repo_manager_clone_path must be set when worker_root_path is specified")
 	}
-	if config.Repository.RepoManagerClonePath == "" {
-		config.Repository.RepoManagerClonePath = filepath.Join(os.TempDir(), "tango-repo-manager")
+	if config.Service.RepoManagerClonePath == "" {
+		config.Service.RepoManagerClonePath = filepath.Join(os.TempDir(), "tango-repo-manager")
 	}
-	if config.Repository.WorkerRootPath == "" {
-		config.Repository.WorkerRootPath = filepath.Join(config.Repository.RepoManagerClonePath, ".workers")
+	if config.Service.WorkerRootPath == "" {
+		config.Service.WorkerRootPath = filepath.Join(config.Service.RepoManagerClonePath, ".workers")
 	}
-	if config.Repository.WorkspacePoolSize <= 0 {
-		return nil, fmt.Errorf("repository.workspace_pool_size must be > 0, got %d", config.Repository.WorkspacePoolSize)
+	if config.Service.WorkerPoolSize <= 0 {
+		return nil, fmt.Errorf("service.worker_pool_size must be > 0, got %d", config.Service.WorkerPoolSize)
+	}
+	config.repositoryByRemote = make(map[string]*RepositoryConfig, len(config.Repository))
+	for i := range config.Repository {
+		remote := config.Repository[i].Remote
+		if remote == "" {
+			return nil, fmt.Errorf("repository[%d].remote must not be empty", i)
+		}
+		if _, exists := config.repositoryByRemote[remote]; exists {
+			return nil, fmt.Errorf("duplicate repository remote %q", remote)
+		}
+		config.repositoryByRemote[remote] = &config.Repository[i]
 	}
 	return &config, nil
 }
