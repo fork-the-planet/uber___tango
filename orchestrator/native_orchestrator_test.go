@@ -21,7 +21,9 @@ import (
 	"io"
 	"testing"
 
-	graphmock "github.com/uber/tango/core/bazelrunner/mock"
+	gogio "github.com/gogo/protobuf/io"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/uber/tango/core/git"
 	gitmock "github.com/uber/tango/core/git/gitmock"
 	repomanagermock "github.com/uber/tango/core/repomanager/mock"
@@ -29,10 +31,8 @@ import (
 	storagemock "github.com/uber/tango/core/storage/storagemock"
 	targethasher "github.com/uber/tango/core/targethasher"
 	workspacemock "github.com/uber/tango/core/workspace/workspacemock"
+	graphmock "github.com/uber/tango/graphrunner/mock"
 	pb "github.com/uber/tango/tangopb"
-	gogio "github.com/gogo/protobuf/io"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"go.uber.org/zap/zaptest"
 )
@@ -200,8 +200,8 @@ func TestNative_GetTargetGraph_AppliesGitHubPR(t *testing.T) {
 	reader, err := o.GetTargetGraph(context.Background(), GetTargetGraphParam{
 		Req: &pb.GetTargetGraphRequest{
 			BuildDescription: &pb.BuildDescription{
-				Remote:      "git@github:uber/tango",
-				BaseSha:     "1234567890",
+				Remote:   "git@github:uber/tango",
+				BaseSha:  "1234567890",
 				Requests: []*pb.Request{{Url: "github://org/repo/pull/123"}},
 			},
 		},
