@@ -15,7 +15,8 @@
 package common
 
 import (
-	"encoding/base64"
+	"crypto/md5"
+	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -44,7 +45,7 @@ func GetGraphByTreeHash(remote, treehash string) string {
 
 // GetTreehashCachePath returns the cache path for the treehash.
 func GetTreehashCachePath(buildDescription *tangopb.BuildDescription) string {
-	return filepath.Join(ToShortRemote(buildDescription.Remote), buildDescription.BaseSha, getReqsBase64(buildDescription.Requests)) + "-" + buildDescription.Strategy.String()
+	return filepath.Join(ToShortRemote(buildDescription.Remote), buildDescription.BaseSha, getReqsHash(buildDescription.Requests)) + "-" + buildDescription.Strategy.String()
 }
 
 // GetComparedTargetsCachePath returns the cache path for a compared target graph result.
@@ -54,18 +55,23 @@ func GetComparedTargetsCachePath(remote, treehash1, treehash2 string) string {
 	return filepath.Join("compared-targets", ToShortRemote(remote), treehash1, treehash2)
 }
 
-// getReqsBase64 returns the base64 encoded request URLs.
-func getReqsBase64(requests []*tangopb.Request) string {
+// getReqsHash returns a fixed-length MD5 hash of the sorted request URLs.
+// Each URL's bytes are fed into the digest individually (no separator), matching
+// the Java MessageDigest.update(str.getBytes()) per-string behavior.
+func getReqsHash(requests []*tangopb.Request) string {
 	if len(requests) == 0 {
 		return ""
 	}
-	encodedURLs := make([]string, 0, len(requests))
+	urls := make([]string, 0, len(requests))
 	for _, req := range requests {
-		encoded := base64.RawURLEncoding.EncodeToString([]byte(req.GetUrl()))
-		encodedURLs = append(encodedURLs, encoded)
+		urls = append(urls, req.GetUrl())
 	}
-	sort.Strings(encodedURLs)
-	return strings.Join(encodedURLs, "-")
+	sort.Strings(urls)
+	h := md5.New()
+	for _, url := range urls {
+		h.Write([]byte(url))
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 // ResultToGetTargetGraphResponse converts a Result to a GetTargetGraphResponse
