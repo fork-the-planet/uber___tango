@@ -1226,6 +1226,281 @@ func (*GetChangedTargetGraphResponse) XXX_OneofWrappers() []interface{} {
 	}
 }
 
+type GetChangedTargetsAndEdgesRequest struct {
+	// The base revision spec
+	FirstRevision *BuildDescription `protobuf:"bytes,1,opt,name=first_revision,json=firstRevision,proto3" json:"first_revision,omitempty"`
+	// The target revision spec
+	SecondRevision *BuildDescription `protobuf:"bytes,2,opt,name=second_revision,json=secondRevision,proto3" json:"second_revision,omitempty"`
+	// Controls what payload details are included in responses; used to reduce payload size when full attribute set is not needed
+	OutputConfig *OutputConfig `protobuf:"bytes,3,opt,name=output_config,json=outputConfig,proto3" json:"output_config,omitempty"`
+}
+
+func (m *GetChangedTargetsAndEdgesRequest) Reset()      { *m = GetChangedTargetsAndEdgesRequest{} }
+func (*GetChangedTargetsAndEdgesRequest) ProtoMessage() {}
+func (*GetChangedTargetsAndEdgesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c4210c857dbeec96, []int{16}
+}
+func (m *GetChangedTargetsAndEdgesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetChangedTargetsAndEdgesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetChangedTargetsAndEdgesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetChangedTargetsAndEdgesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetChangedTargetsAndEdgesRequest.Merge(m, src)
+}
+func (m *GetChangedTargetsAndEdgesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetChangedTargetsAndEdgesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetChangedTargetsAndEdgesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetChangedTargetsAndEdgesRequest proto.InternalMessageInfo
+
+func (m *GetChangedTargetsAndEdgesRequest) GetFirstRevision() *BuildDescription {
+	if m != nil {
+		return m.FirstRevision
+	}
+	return nil
+}
+
+func (m *GetChangedTargetsAndEdgesRequest) GetSecondRevision() *BuildDescription {
+	if m != nil {
+		return m.SecondRevision
+	}
+	return nil
+}
+
+func (m *GetChangedTargetsAndEdgesRequest) GetOutputConfig() *OutputConfig {
+	if m != nil {
+		return m.OutputConfig
+	}
+	return nil
+}
+
+type GetChangedTargetsAndEdgesResponse struct {
+	// Types that are valid to be assigned to Item:
+	//
+	//	*GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges
+	//	*GetChangedTargetsAndEdgesResponse_Metadata
+	Item isGetChangedTargetsAndEdgesResponse_Item `protobuf_oneof:"item"`
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) Reset()      { *m = GetChangedTargetsAndEdgesResponse{} }
+func (*GetChangedTargetsAndEdgesResponse) ProtoMessage() {}
+func (*GetChangedTargetsAndEdgesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c4210c857dbeec96, []int{17}
+}
+func (m *GetChangedTargetsAndEdgesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *GetChangedTargetsAndEdgesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GetChangedTargetsAndEdgesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *GetChangedTargetsAndEdgesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetChangedTargetsAndEdgesResponse.Merge(m, src)
+}
+func (m *GetChangedTargetsAndEdgesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *GetChangedTargetsAndEdgesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetChangedTargetsAndEdgesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetChangedTargetsAndEdgesResponse proto.InternalMessageInfo
+
+type isGetChangedTargetsAndEdgesResponse_Item interface {
+	isGetChangedTargetsAndEdgesResponse_Item()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges struct {
+	ChangedTargetsAndEdges *ChangedTargetsAndEdges `protobuf:"bytes,1,opt,name=changed_targets_and_edges,json=changedTargetsAndEdges,proto3,oneof" json:"changed_targets_and_edges,omitempty"`
+}
+type GetChangedTargetsAndEdgesResponse_Metadata struct {
+	Metadata *Metadata `protobuf:"bytes,2,opt,name=metadata,proto3,oneof" json:"metadata,omitempty"`
+}
+
+func (*GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) isGetChangedTargetsAndEdgesResponse_Item() {
+}
+func (*GetChangedTargetsAndEdgesResponse_Metadata) isGetChangedTargetsAndEdgesResponse_Item() {}
+
+func (m *GetChangedTargetsAndEdgesResponse) GetItem() isGetChangedTargetsAndEdgesResponse_Item {
+	if m != nil {
+		return m.Item
+	}
+	return nil
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) GetChangedTargetsAndEdges() *ChangedTargetsAndEdges {
+	if x, ok := m.GetItem().(*GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges); ok {
+		return x.ChangedTargetsAndEdges
+	}
+	return nil
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) GetMetadata() *Metadata {
+	if x, ok := m.GetItem().(*GetChangedTargetsAndEdgesResponse_Metadata); ok {
+		return x.Metadata
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*GetChangedTargetsAndEdgesResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges)(nil),
+		(*GetChangedTargetsAndEdgesResponse_Metadata)(nil),
+	}
+}
+
+type Edge struct {
+	SourceId int32 `protobuf:"varint,1,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`
+	TargetId int32 `protobuf:"varint,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+}
+
+func (m *Edge) Reset()      { *m = Edge{} }
+func (*Edge) ProtoMessage() {}
+func (*Edge) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c4210c857dbeec96, []int{18}
+}
+func (m *Edge) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Edge) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Edge.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Edge) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Edge.Merge(m, src)
+}
+func (m *Edge) XXX_Size() int {
+	return m.Size()
+}
+func (m *Edge) XXX_DiscardUnknown() {
+	xxx_messageInfo_Edge.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Edge proto.InternalMessageInfo
+
+func (m *Edge) GetSourceId() int32 {
+	if m != nil {
+		return m.SourceId
+	}
+	return 0
+}
+
+func (m *Edge) GetTargetId() int32 {
+	if m != nil {
+		return m.TargetId
+	}
+	return 0
+}
+
+type ChangedTargetsAndEdges struct {
+	ChangedTargets []*ChangedTarget   `protobuf:"bytes,1,rep,name=changed_targets,json=changedTargets,proto3" json:"changed_targets,omitempty"`
+	AddedTargets   []*OptimizedTarget `protobuf:"bytes,2,rep,name=added_targets,json=addedTargets,proto3" json:"added_targets,omitempty"`
+	RemovedTargets []*OptimizedTarget `protobuf:"bytes,3,rep,name=removed_targets,json=removedTargets,proto3" json:"removed_targets,omitempty"`
+	NewEdges       []*Edge            `protobuf:"bytes,4,rep,name=new_edges,json=newEdges,proto3" json:"new_edges,omitempty"`
+	RemovedEdges   []*Edge            `protobuf:"bytes,5,rep,name=removed_edges,json=removedEdges,proto3" json:"removed_edges,omitempty"`
+}
+
+func (m *ChangedTargetsAndEdges) Reset()      { *m = ChangedTargetsAndEdges{} }
+func (*ChangedTargetsAndEdges) ProtoMessage() {}
+func (*ChangedTargetsAndEdges) Descriptor() ([]byte, []int) {
+	return fileDescriptor_c4210c857dbeec96, []int{19}
+}
+func (m *ChangedTargetsAndEdges) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ChangedTargetsAndEdges) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ChangedTargetsAndEdges.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ChangedTargetsAndEdges) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ChangedTargetsAndEdges.Merge(m, src)
+}
+func (m *ChangedTargetsAndEdges) XXX_Size() int {
+	return m.Size()
+}
+func (m *ChangedTargetsAndEdges) XXX_DiscardUnknown() {
+	xxx_messageInfo_ChangedTargetsAndEdges.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ChangedTargetsAndEdges proto.InternalMessageInfo
+
+func (m *ChangedTargetsAndEdges) GetChangedTargets() []*ChangedTarget {
+	if m != nil {
+		return m.ChangedTargets
+	}
+	return nil
+}
+
+func (m *ChangedTargetsAndEdges) GetAddedTargets() []*OptimizedTarget {
+	if m != nil {
+		return m.AddedTargets
+	}
+	return nil
+}
+
+func (m *ChangedTargetsAndEdges) GetRemovedTargets() []*OptimizedTarget {
+	if m != nil {
+		return m.RemovedTargets
+	}
+	return nil
+}
+
+func (m *ChangedTargetsAndEdges) GetNewEdges() []*Edge {
+	if m != nil {
+		return m.NewEdges
+	}
+	return nil
+}
+
+func (m *ChangedTargetsAndEdges) GetRemovedEdges() []*Edge {
+	if m != nil {
+		return m.RemovedEdges
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("uber.tango.ComputationStrategy", ComputationStrategy_name, ComputationStrategy_value)
 	proto.RegisterEnum("uber.tango.ChangeType", ChangeType_name, ChangeType_value)
@@ -1251,100 +1526,114 @@ func init() {
 	proto.RegisterType((*GetChangedServicesResponse)(nil), "uber.tango.GetChangedServicesResponse")
 	proto.RegisterType((*GetChangedTargetGraphRequest)(nil), "uber.tango.GetChangedTargetGraphRequest")
 	proto.RegisterType((*GetChangedTargetGraphResponse)(nil), "uber.tango.GetChangedTargetGraphResponse")
+	proto.RegisterType((*GetChangedTargetsAndEdgesRequest)(nil), "uber.tango.GetChangedTargetsAndEdgesRequest")
+	proto.RegisterType((*GetChangedTargetsAndEdgesResponse)(nil), "uber.tango.GetChangedTargetsAndEdgesResponse")
+	proto.RegisterType((*Edge)(nil), "uber.tango.Edge")
+	proto.RegisterType((*ChangedTargetsAndEdges)(nil), "uber.tango.ChangedTargetsAndEdges")
 }
 
 func init() { proto.RegisterFile("tango.proto", fileDescriptor_c4210c857dbeec96) }
 
 var fileDescriptor_c4210c857dbeec96 = []byte{
-	// 1400 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x58, 0xbd, 0x6f, 0xdb, 0x46,
-	0x14, 0xd7, 0xe9, 0xc3, 0x96, 0x9f, 0x6c, 0x49, 0x3e, 0xbb, 0x8e, 0x2c, 0x27, 0x8c, 0x43, 0x24,
-	0x85, 0x93, 0xa0, 0x4a, 0xe1, 0x20, 0x68, 0x90, 0x22, 0x83, 0x2d, 0xb3, 0xb6, 0xd0, 0x44, 0x36,
-	0x28, 0x39, 0x45, 0x9a, 0x81, 0x38, 0x91, 0x17, 0x99, 0xa8, 0x44, 0xb2, 0xe4, 0x29, 0x89, 0x33,
-	0x75, 0xed, 0x52, 0x74, 0xec, 0x54, 0xa0, 0x05, 0x0a, 0x74, 0xef, 0x5f, 0xd0, 0xad, 0x63, 0x80,
-	0x2e, 0x19, 0x3a, 0x34, 0x0a, 0x5a, 0xb4, 0x5b, 0xa6, 0xce, 0xc5, 0x1d, 0x29, 0x8a, 0x94, 0x25,
-	0x7f, 0xa0, 0x4b, 0x91, 0xed, 0xee, 0xdd, 0xef, 0xfd, 0xde, 0xe7, 0xdd, 0xa3, 0x04, 0x39, 0x46,
-	0xac, 0xb6, 0x5d, 0x71, 0x5c, 0x9b, 0xd9, 0x18, 0x7a, 0x2d, 0xea, 0x56, 0x84, 0x44, 0xbe, 0x09,
-	0xd3, 0x2a, 0xfd, 0xbc, 0x47, 0x3d, 0x86, 0x8b, 0x90, 0xea, 0xb9, 0x9d, 0x12, 0x5a, 0x45, 0x6b,
-	0x33, 0x2a, 0x5f, 0xe2, 0x25, 0x98, 0xd2, 0xed, 0x6e, 0xd7, 0x64, 0xa5, 0xa4, 0x10, 0x06, 0x3b,
-	0xf9, 0x27, 0x04, 0xc5, 0xcd, 0x9e, 0xd9, 0x31, 0xb6, 0xa8, 0xa7, 0xbb, 0xa6, 0xc3, 0x4c, 0xdb,
-	0xe2, 0x60, 0x97, 0x76, 0x6d, 0x46, 0x03, 0x86, 0x60, 0x87, 0x97, 0x21, 0xdb, 0x22, 0x1e, 0xd5,
-	0xbc, 0x03, 0x12, 0xd0, 0x4c, 0xf3, 0x7d, 0xe3, 0x80, 0xe0, 0x1b, 0x90, 0x75, 0x7d, 0xe3, 0x5e,
-	0x29, 0xb5, 0x9a, 0x5a, 0xcb, 0xad, 0x2f, 0x54, 0x86, 0xbe, 0x55, 0x02, 0xc7, 0xd4, 0x10, 0x84,
-	0x3f, 0x84, 0xac, 0xc7, 0x5c, 0xc2, 0x68, 0xfb, 0xb0, 0x94, 0x5e, 0x45, 0x6b, 0xf9, 0xf5, 0x8b,
-	0x51, 0x85, 0xaa, 0xdd, 0x75, 0x7a, 0x8c, 0x70, 0x77, 0x1a, 0x01, 0x4c, 0x0d, 0x15, 0xe4, 0x7f,
-	0x10, 0xcc, 0xee, 0xf6, 0x98, 0xd3, 0x63, 0x55, 0xdb, 0x7a, 0x6c, 0xb6, 0xf1, 0x25, 0x98, 0x35,
-	0x2d, 0xbd, 0xd3, 0x33, 0xa8, 0xc6, 0x48, 0xdb, 0x13, 0x7e, 0x67, 0xd5, 0x5c, 0x20, 0x6b, 0x92,
-	0xb6, 0x87, 0xdf, 0x03, 0x3c, 0x80, 0x10, 0xc6, 0x5c, 0xb3, 0xd5, 0x63, 0xd4, 0x13, 0x61, 0x64,
-	0xd5, 0xf9, 0xe0, 0x64, 0x23, 0x3c, 0xc0, 0x57, 0x20, 0x3f, 0x80, 0x1f, 0x10, 0xef, 0x80, 0xf2,
-	0xb0, 0x38, 0x74, 0x2e, 0x90, 0xee, 0x08, 0x21, 0xbe, 0x00, 0xe0, 0xda, 0x36, 0xf3, 0x34, 0xdb,
-	0xea, 0xf8, 0x81, 0x64, 0xd5, 0x19, 0x21, 0xd9, 0xb5, 0x3a, 0x87, 0xf8, 0x3a, 0xcc, 0xeb, 0x22,
-	0x12, 0xaa, 0x19, 0xa6, 0xc7, 0x88, 0xa5, 0x53, 0xaf, 0x94, 0x11, 0xa8, 0x62, 0x70, 0xb0, 0x35,
-	0x90, 0xf3, 0x20, 0xba, 0xe4, 0x59, 0x08, 0x2c, 0x4d, 0xad, 0xa2, 0xb5, 0x8c, 0x9a, 0xeb, 0x92,
-	0x67, 0x03, 0x8c, 0xfc, 0x6b, 0x12, 0x0a, 0xbb, 0x0e, 0x33, 0xbb, 0xe6, 0x73, 0x6a, 0x34, 0x89,
-	0xdb, 0xa6, 0x0c, 0xe7, 0x21, 0x69, 0x1a, 0x22, 0xe2, 0x8c, 0x9a, 0x34, 0x0d, 0x8c, 0x21, 0xcd,
-	0x3d, 0x0e, 0x2a, 0x24, 0xd6, 0xf8, 0x06, 0x2c, 0x18, 0xa6, 0x4b, 0x75, 0xa6, 0x19, 0xd4, 0xa1,
-	0x96, 0x41, 0x2d, 0xdd, 0xa4, 0x7e, 0xa5, 0x32, 0x2a, 0xf6, 0x8f, 0xb6, 0x22, 0x27, 0x9c, 0x44,
-	0x24, 0x32, 0x2d, 0x10, 0x62, 0x8d, 0x57, 0x60, 0xc6, 0xed, 0x75, 0xa8, 0xc6, 0x0e, 0x1d, 0x2a,
-	0x82, 0xc8, 0xa8, 0x59, 0x2e, 0x68, 0x1e, 0x3a, 0x94, 0x2b, 0xf0, 0xb0, 0x85, 0xd3, 0x59, 0x55,
-	0xac, 0x71, 0x19, 0xb2, 0xf4, 0x19, 0xa3, 0xae, 0x45, 0x3a, 0xa5, 0x69, 0x21, 0x0f, 0xf7, 0xf8,
-	0x63, 0x80, 0x48, 0x19, 0xb2, 0xa2, 0x65, 0xae, 0x47, 0x3b, 0x60, 0x24, 0xcc, 0xca, 0xb0, 0x36,
-	0x8a, 0xc5, 0xdc, 0x43, 0x35, 0xa2, 0x5e, 0xbe, 0x0b, 0x85, 0x91, 0x63, 0x7e, 0x05, 0x3e, 0xa3,
-	0x87, 0x41, 0x5a, 0xf8, 0x12, 0x2f, 0x42, 0xe6, 0x09, 0xe9, 0xf4, 0xa8, 0x48, 0x4c, 0x46, 0xf5,
-	0x37, 0x77, 0x92, 0xb7, 0x91, 0x5c, 0x83, 0xe2, 0x88, 0x35, 0x0f, 0xdf, 0x82, 0x69, 0xe6, 0x2f,
-	0x4b, 0x48, 0x38, 0xb7, 0x72, 0x8c, 0x73, 0xea, 0x00, 0x2b, 0x37, 0x21, 0x5f, 0x3d, 0x20, 0x56,
-	0x7b, 0x48, 0xb4, 0x09, 0x05, 0xdd, 0x97, 0x68, 0x71, 0xc2, 0xe5, 0x58, 0xbf, 0x47, 0x95, 0xd4,
-	0xbc, 0x1e, 0xe3, 0x90, 0x7f, 0x43, 0x30, 0x17, 0x43, 0xe0, 0x0f, 0x20, 0xe7, 0x63, 0xfc, 0x6a,
-	0x20, 0x71, 0x83, 0x96, 0x8e, 0x32, 0xf2, 0xda, 0xa8, 0xa0, 0x87, 0x6b, 0x7c, 0x07, 0xc0, 0xee,
-	0x0c, 0x5c, 0x11, 0xa9, 0x38, 0x21, 0xb4, 0x19, 0xbb, 0x33, 0x30, 0x7a, 0x07, 0xc0, 0xa2, 0x4f,
-	0x07, 0xba, 0xa9, 0x53, 0xe8, 0x5a, 0xf4, 0x69, 0xa0, 0x5b, 0x86, 0x6c, 0xd8, 0xd8, 0x69, 0xbf,
-	0x77, 0x06, 0x7b, 0xf9, 0xe7, 0x29, 0xc8, 0xde, 0xa7, 0x8c, 0x18, 0x84, 0x11, 0xbc, 0x0f, 0xf3,
-	0xbe, 0x01, 0xcd, 0x34, 0xb4, 0x2e, 0x71, 0x1c, 0xd3, 0x6a, 0x07, 0x19, 0xbb, 0x1a, 0xb5, 0x35,
-	0x50, 0xa8, 0xf8, 0x06, 0x6a, 0xc6, 0x7d, 0x1f, 0xeb, 0x77, 0x47, 0x81, 0xc5, 0xa5, 0x9c, 0x36,
-	0x6c, 0xde, 0x90, 0x36, 0x79, 0x0c, 0xad, 0x1a, 0x74, 0x76, 0x9c, 0xd6, 0x8d, 0x4b, 0xb1, 0xc2,
-	0xdf, 0xe3, 0x76, 0x48, 0xe8, 0x3f, 0x7d, 0x97, 0x27, 0xf8, 0xd9, 0x8e, 0x71, 0x01, 0x0b, 0x05,
-	0xd8, 0x80, 0xa5, 0xb0, 0x9d, 0x35, 0x8b, 0x74, 0x87, 0x2e, 0xa6, 0x05, 0x63, 0x65, 0x2c, 0x63,
-	0xd8, 0xf3, 0x75, 0xd2, 0x8d, 0xfb, 0xb9, 0x48, 0xc6, 0x1c, 0xe1, 0xe7, 0x20, 0x0d, 0xad, 0x78,
-	0xcc, 0x35, 0xad, 0xb6, 0x26, 0x6e, 0x41, 0x68, 0x2d, 0x23, 0xac, 0xdd, 0x3a, 0xde, 0x5a, 0x43,
-	0x68, 0x3e, 0xe0, 0x8a, 0x31, 0xa3, 0x2b, 0x64, 0x32, 0xa2, 0xbc, 0x09, 0x8b, 0xe3, 0x0a, 0x75,
-	0xd2, 0x3d, 0x9d, 0x89, 0xdc, 0x53, 0xce, 0x31, 0xae, 0x2a, 0x67, 0xe2, 0xb8, 0x0b, 0x85, 0x91,
-	0x42, 0x9c, 0x49, 0x7d, 0x1b, 0x96, 0x27, 0x66, 0xfd, 0x4c, 0x44, 0x75, 0x58, 0x3d, 0x29, 0xa1,
-	0x67, 0xe1, 0x93, 0xbf, 0x43, 0xf0, 0xce, 0x36, 0x65, 0x7e, 0x8e, 0xb7, 0x5d, 0xe2, 0x1c, 0x0c,
-	0x3e, 0x06, 0x6a, 0x30, 0xdf, 0xe2, 0x13, 0x5e, 0x33, 0x86, 0x23, 0x5e, 0x70, 0xe6, 0xd6, 0xcf,
-	0x47, 0x0b, 0x3d, 0xfa, 0x19, 0xa0, 0x16, 0x5b, 0xa3, 0x1f, 0x06, 0x77, 0x61, 0xce, 0x16, 0x63,
-	0x57, 0xd3, 0xc5, 0xdc, 0x0d, 0xde, 0x8f, 0x52, 0xec, 0x0d, 0x88, 0xcc, 0x65, 0x75, 0xd6, 0x8e,
-	0xec, 0xe4, 0xaf, 0x10, 0x2c, 0x8d, 0xfa, 0xe8, 0x39, 0xb6, 0xe5, 0x51, 0x7c, 0x3b, 0xfa, 0xdc,
-	0x1e, 0x71, 0x6d, 0xf4, 0x75, 0xde, 0x49, 0x84, 0x2f, 0x2e, 0x5e, 0x87, 0x6c, 0x37, 0x68, 0xd1,
-	0xc0, 0x9d, 0xc5, 0x71, 0xed, 0xbb, 0x93, 0x50, 0x43, 0xdc, 0xe6, 0x14, 0xa4, 0x4d, 0x46, 0xbb,
-	0xf2, 0x1f, 0x08, 0x4a, 0xdb, 0x94, 0xc5, 0x5f, 0xec, 0x41, 0xde, 0xaa, 0x90, 0x7f, 0x6c, 0xba,
-	0x1e, 0xd3, 0x5c, 0xfa, 0xc4, 0xf4, 0x4e, 0x9b, 0xb4, 0x39, 0xa1, 0xa3, 0x06, 0x2a, 0x58, 0x81,
-	0x82, 0x47, 0x75, 0xdb, 0x32, 0x86, 0x2c, 0xc9, 0x53, 0xb0, 0xe4, 0x7d, 0xa5, 0x90, 0xe6, 0x48,
-	0xe2, 0x53, 0x67, 0x4a, 0xfc, 0xb7, 0x08, 0x96, 0xc7, 0xc4, 0x19, 0xe4, 0x5e, 0x19, 0x37, 0xa1,
-	0x38, 0x7d, 0x79, 0xe2, 0x84, 0xe2, 0x15, 0x18, 0x19, 0x52, 0xff, 0xa9, 0x10, 0x7f, 0xc6, 0x1c,
-	0x6c, 0x50, 0xf7, 0x89, 0xa9, 0xd3, 0xb7, 0xb1, 0x12, 0x2d, 0x28, 0x8f, 0x8b, 0x33, 0xa8, 0xc4,
-	0x25, 0x98, 0xf5, 0x7c, 0x99, 0x18, 0x02, 0xc1, 0xe7, 0x77, 0x2e, 0x90, 0xf1, 0xf7, 0x86, 0x43,
-	0x82, 0xf1, 0xc8, 0x11, 0x9e, 0x18, 0x61, 0x33, 0x6a, 0xce, 0x97, 0x71, 0x84, 0x27, 0xff, 0x8d,
-	0xe0, 0xfc, 0x68, 0xb5, 0x63, 0x2f, 0xc2, 0x5b, 0x94, 0xcf, 0xef, 0x11, 0x5c, 0x98, 0x10, 0xeb,
-	0xff, 0xa6, 0xbb, 0xaf, 0x7d, 0x83, 0x60, 0x61, 0xcc, 0x0f, 0x1a, 0xbc, 0x0a, 0xe7, 0xab, 0xbb,
-	0xf7, 0xf7, 0xf6, 0x9b, 0x1b, 0xcd, 0xda, 0x6e, 0x5d, 0x6b, 0x34, 0xd5, 0x8d, 0xa6, 0xb2, 0xfd,
-	0x50, 0xab, 0xd5, 0x1f, 0x6c, 0xdc, 0xab, 0x6d, 0x15, 0x13, 0x58, 0x82, 0xf2, 0x58, 0xc4, 0x7e,
-	0xbd, 0xa1, 0x34, 0x8b, 0x68, 0xe2, 0x79, 0x63, 0x47, 0xb9, 0x77, 0xaf, 0x98, 0xc4, 0x17, 0x61,
-	0x65, 0xec, 0x79, 0x7d, 0xa3, 0x59, 0x7b, 0xa0, 0x14, 0x53, 0xd7, 0xbe, 0x44, 0x00, 0xc3, 0x2f,
-	0x45, 0x7c, 0x0e, 0x16, 0xaa, 0x3b, 0x1b, 0xf5, 0x6d, 0x45, 0x6b, 0x3e, 0xdc, 0x53, 0x22, 0x8e,
-	0x2c, 0x40, 0x21, 0x7a, 0x50, 0x57, 0x3e, 0x29, 0x22, 0xbc, 0x04, 0x38, 0x2a, 0xdc, 0xaa, 0xa9,
-	0x4a, 0xb5, 0x59, 0x4c, 0xe2, 0x12, 0x2c, 0xc6, 0x59, 0x82, 0x93, 0x14, 0x5e, 0x81, 0x73, 0xd1,
-	0x93, 0xfd, 0x7a, 0x63, 0x4f, 0xa9, 0xd6, 0x3e, 0xaa, 0x29, 0x5b, 0xc5, 0xf4, 0xfa, 0x0f, 0x29,
-	0xc8, 0x34, 0x79, 0x36, 0xf1, 0x23, 0xc8, 0xc7, 0xe7, 0x04, 0xbe, 0x14, 0x4d, 0xf6, 0xd8, 0x39,
-	0x57, 0x96, 0x8f, 0x83, 0xf8, 0xcd, 0x20, 0x27, 0xde, 0x47, 0xd8, 0x80, 0xf9, 0x23, 0x6f, 0x21,
-	0xbe, 0x3c, 0xa2, 0x3c, 0x76, 0x24, 0x94, 0xaf, 0x9c, 0x80, 0x8a, 0x58, 0x69, 0x03, 0x3e, 0x7a,
-	0xd1, 0xf1, 0x04, 0x82, 0x91, 0x07, 0xaf, 0xfc, 0xee, 0x49, 0xb0, 0x88, 0x21, 0x47, 0xcc, 0xfd,
-	0xa3, 0x17, 0x00, 0xaf, 0x1d, 0xe7, 0x6c, 0x2c, 0x73, 0x57, 0x4f, 0x81, 0x1c, 0x5a, 0xdc, 0x7c,
-	0xf4, 0xe2, 0x95, 0x94, 0x78, 0xf9, 0x4a, 0x4a, 0xbc, 0x79, 0x25, 0xa1, 0x2f, 0xfa, 0x12, 0xfa,
-	0xb1, 0x2f, 0xa1, 0x5f, 0xfa, 0x12, 0x7a, 0xd1, 0x97, 0xd0, 0xef, 0x7d, 0x09, 0xfd, 0xd5, 0x97,
-	0x12, 0x6f, 0xfa, 0x12, 0xfa, 0xfa, 0xb5, 0x94, 0x78, 0xf1, 0x5a, 0x4a, 0xbc, 0x7c, 0x2d, 0x25,
-	0x20, 0xaf, 0xdb, 0xdd, 0x88, 0x9d, 0x4d, 0x10, 0xa5, 0xde, 0x73, 0x6d, 0x66, 0xef, 0xa1, 0x4f,
-	0xa7, 0x85, 0xd0, 0x69, 0xb5, 0xa6, 0xc4, 0x1f, 0x1b, 0x37, 0xff, 0x0d, 0x00, 0x00, 0xff, 0xff,
-	0x0d, 0x6b, 0xe0, 0xa4, 0xe7, 0x10, 0x00, 0x00,
+	// 1565 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x58, 0x3d, 0x6c, 0xdb, 0xc6,
+	0x1e, 0xd7, 0xe9, 0xc3, 0xa6, 0xff, 0xb2, 0x25, 0xf9, 0xec, 0xe7, 0xc8, 0x72, 0xa2, 0xd8, 0x44,
+	0x02, 0x38, 0xc9, 0x8b, 0xf3, 0xe0, 0x20, 0x78, 0x41, 0x1e, 0x02, 0xc4, 0x96, 0xf5, 0x6c, 0xe1,
+	0x25, 0xb2, 0x41, 0xc9, 0x79, 0xc8, 0xcb, 0x40, 0x50, 0xe4, 0x45, 0x26, 0x9e, 0x44, 0xaa, 0xe4,
+	0xc9, 0x89, 0x83, 0x0e, 0x5d, 0xbb, 0x14, 0x1d, 0x3b, 0x15, 0x68, 0xa7, 0xee, 0xdd, 0x3a, 0xb5,
+	0x5b, 0xd1, 0x29, 0x40, 0x97, 0x0c, 0x1d, 0x1a, 0x07, 0x2d, 0xda, 0xa1, 0x40, 0xa6, 0xce, 0xc5,
+	0x1d, 0x8f, 0x14, 0x29, 0x53, 0xfe, 0x40, 0x3a, 0x14, 0xd9, 0x78, 0xff, 0x8f, 0xdf, 0xff, 0xf3,
+	0xee, 0xfe, 0x47, 0xc8, 0x52, 0xcd, 0x6a, 0xdb, 0x2b, 0x3d, 0xc7, 0xa6, 0x36, 0x86, 0x7e, 0x8b,
+	0x38, 0x2b, 0x9c, 0x22, 0xdf, 0x84, 0x71, 0x85, 0xbc, 0xd7, 0x27, 0x2e, 0xc5, 0x05, 0x48, 0xf5,
+	0x9d, 0x4e, 0x11, 0x2d, 0xa2, 0xe5, 0x09, 0x85, 0x7d, 0xe2, 0x39, 0x18, 0xd3, 0xed, 0x6e, 0xd7,
+	0xa4, 0xc5, 0x24, 0x27, 0x8a, 0x95, 0xfc, 0x25, 0x82, 0xc2, 0x7a, 0xdf, 0xec, 0x18, 0x1b, 0xc4,
+	0xd5, 0x1d, 0xb3, 0x47, 0x4d, 0xdb, 0x62, 0xc2, 0x0e, 0xe9, 0xda, 0x94, 0x08, 0x04, 0xb1, 0xc2,
+	0xf3, 0x20, 0xb5, 0x34, 0x97, 0xa8, 0xee, 0x9e, 0x26, 0x60, 0xc6, 0xd9, 0xba, 0xb1, 0xa7, 0xe1,
+	0x1b, 0x20, 0x39, 0x9e, 0x71, 0xb7, 0x98, 0x5a, 0x4c, 0x2d, 0x67, 0x57, 0x67, 0x56, 0x06, 0xbe,
+	0xad, 0x08, 0xc7, 0x94, 0x40, 0x08, 0xff, 0x0b, 0x24, 0x97, 0x3a, 0x1a, 0x25, 0xed, 0x83, 0x62,
+	0x7a, 0x11, 0x2d, 0xe7, 0x56, 0x2f, 0x86, 0x15, 0x2a, 0x76, 0xb7, 0xd7, 0xa7, 0x1a, 0x73, 0xa7,
+	0x21, 0xc4, 0x94, 0x40, 0x41, 0xfe, 0x1d, 0xc1, 0xe4, 0x76, 0x9f, 0xf6, 0xfa, 0xb4, 0x62, 0x5b,
+	0x4f, 0xcc, 0x36, 0x5e, 0x82, 0x49, 0xd3, 0xd2, 0x3b, 0x7d, 0x83, 0xa8, 0x54, 0x6b, 0xbb, 0xdc,
+	0x6f, 0x49, 0xc9, 0x0a, 0x5a, 0x53, 0x6b, 0xbb, 0xf8, 0x3a, 0x60, 0x5f, 0x44, 0xa3, 0xd4, 0x31,
+	0x5b, 0x7d, 0x4a, 0x5c, 0x1e, 0x86, 0xa4, 0x4c, 0x0b, 0xce, 0x5a, 0xc0, 0xc0, 0x97, 0x21, 0xe7,
+	0x8b, 0xef, 0x69, 0xee, 0x1e, 0x61, 0x61, 0x31, 0xd1, 0x29, 0x41, 0xdd, 0xe2, 0x44, 0x7c, 0x01,
+	0xc0, 0xb1, 0x6d, 0xea, 0xaa, 0xb6, 0xd5, 0xf1, 0x02, 0x91, 0x94, 0x09, 0x4e, 0xd9, 0xb6, 0x3a,
+	0x07, 0xf8, 0x1a, 0x4c, 0xeb, 0x3c, 0x12, 0xa2, 0x1a, 0xa6, 0x4b, 0x35, 0x4b, 0x27, 0x6e, 0x31,
+	0xc3, 0xa5, 0x0a, 0x82, 0xb1, 0xe1, 0xd3, 0x59, 0x10, 0x5d, 0xed, 0x59, 0x20, 0x58, 0x1c, 0x5b,
+	0x44, 0xcb, 0x19, 0x25, 0xdb, 0xd5, 0x9e, 0xf9, 0x32, 0xf2, 0xf7, 0x49, 0xc8, 0x6f, 0xf7, 0xa8,
+	0xd9, 0x35, 0x9f, 0x13, 0xa3, 0xa9, 0x39, 0x6d, 0x42, 0x71, 0x0e, 0x92, 0xa6, 0xc1, 0x23, 0xce,
+	0x28, 0x49, 0xd3, 0xc0, 0x18, 0xd2, 0xcc, 0x63, 0x51, 0x21, 0xfe, 0x8d, 0x6f, 0xc0, 0x8c, 0x61,
+	0x3a, 0x44, 0xa7, 0xaa, 0x41, 0x7a, 0xc4, 0x32, 0x88, 0xa5, 0x9b, 0xc4, 0xab, 0x54, 0x46, 0xc1,
+	0x1e, 0x6b, 0x23, 0xc4, 0x61, 0x20, 0x3c, 0x91, 0x69, 0x2e, 0xc1, 0xbf, 0xf1, 0x02, 0x4c, 0x38,
+	0xfd, 0x0e, 0x51, 0xe9, 0x41, 0x8f, 0xf0, 0x20, 0x32, 0x8a, 0xc4, 0x08, 0xcd, 0x83, 0x1e, 0x61,
+	0x0a, 0x2c, 0x6c, 0xee, 0xb4, 0xa4, 0xf0, 0x6f, 0x5c, 0x02, 0x89, 0x3c, 0xa3, 0xc4, 0xb1, 0xb4,
+	0x4e, 0x71, 0x9c, 0xd3, 0x83, 0x35, 0xfe, 0x0f, 0x40, 0xa8, 0x0c, 0x12, 0x6f, 0x99, 0x6b, 0xe1,
+	0x0e, 0x18, 0x0a, 0x73, 0x65, 0x50, 0x9b, 0xaa, 0x45, 0x9d, 0x03, 0x25, 0xa4, 0x5e, 0xba, 0x0b,
+	0xf9, 0x21, 0x36, 0xdb, 0x02, 0xff, 0x27, 0x07, 0x22, 0x2d, 0xec, 0x13, 0xcf, 0x42, 0x66, 0x5f,
+	0xeb, 0xf4, 0x09, 0x4f, 0x4c, 0x46, 0xf1, 0x16, 0x77, 0x92, 0xb7, 0x91, 0x5c, 0x83, 0xc2, 0x90,
+	0x35, 0x17, 0xdf, 0x82, 0x71, 0xea, 0x7d, 0x16, 0x11, 0x77, 0x6e, 0xe1, 0x18, 0xe7, 0x14, 0x5f,
+	0x56, 0x6e, 0x42, 0xae, 0xb2, 0xa7, 0x59, 0xed, 0x01, 0xd0, 0x3a, 0xe4, 0x75, 0x8f, 0xa2, 0x46,
+	0x01, 0xe7, 0x23, 0xfd, 0x1e, 0x56, 0x52, 0x72, 0x7a, 0x04, 0x43, 0xfe, 0x01, 0xc1, 0x54, 0x44,
+	0x02, 0xff, 0x13, 0xb2, 0x9e, 0x8c, 0x57, 0x0d, 0xc4, 0x77, 0xd0, 0xdc, 0x51, 0x44, 0x56, 0x1b,
+	0x05, 0xf4, 0xe0, 0x1b, 0xdf, 0x01, 0xb0, 0x3b, 0xbe, 0x2b, 0x3c, 0x15, 0x27, 0x84, 0x36, 0x61,
+	0x77, 0x7c, 0xa3, 0x77, 0x00, 0x2c, 0xf2, 0xd4, 0xd7, 0x4d, 0x9d, 0x42, 0xd7, 0x22, 0x4f, 0x85,
+	0x6e, 0x09, 0xa4, 0xa0, 0xb1, 0xd3, 0x5e, 0xef, 0xf8, 0x6b, 0xf9, 0x9b, 0x31, 0x90, 0x1e, 0x10,
+	0xaa, 0x19, 0x1a, 0xd5, 0xf0, 0x2e, 0x4c, 0x7b, 0x06, 0x54, 0xd3, 0x50, 0xbb, 0x5a, 0xaf, 0x67,
+	0x5a, 0x6d, 0x91, 0xb1, 0x2b, 0x61, 0x5b, 0xbe, 0xc2, 0x8a, 0x67, 0xa0, 0x66, 0x3c, 0xf0, 0x64,
+	0xbd, 0xee, 0xc8, 0xd3, 0x28, 0x95, 0xc1, 0x06, 0xcd, 0x1b, 0xc0, 0x26, 0x8f, 0x81, 0x55, 0x44,
+	0x67, 0x47, 0x61, 0x9d, 0x28, 0x15, 0x57, 0xd9, 0x79, 0xdc, 0x0e, 0x00, 0xbd, 0xa3, 0xef, 0xd2,
+	0x08, 0x3f, 0xdb, 0x11, 0x2c, 0xa0, 0x01, 0x01, 0x1b, 0x30, 0x17, 0xb4, 0xb3, 0x6a, 0x69, 0xdd,
+	0x81, 0x8b, 0x69, 0x8e, 0xb8, 0x12, 0x8b, 0x18, 0xf4, 0x7c, 0x5d, 0xeb, 0x46, 0xfd, 0x9c, 0xd5,
+	0x62, 0x58, 0xf8, 0x39, 0x94, 0x07, 0x56, 0x5c, 0xea, 0x98, 0x56, 0x5b, 0xe5, 0xbb, 0x20, 0xb0,
+	0x96, 0xe1, 0xd6, 0x6e, 0x1d, 0x6f, 0xad, 0xc1, 0x35, 0x1f, 0x32, 0xc5, 0x88, 0xd1, 0x05, 0x6d,
+	0xb4, 0x44, 0x69, 0x1d, 0x66, 0xe3, 0x0a, 0x75, 0xd2, 0x3e, 0x9d, 0x08, 0xed, 0x53, 0x86, 0x11,
+	0x57, 0x95, 0x33, 0x61, 0xdc, 0x85, 0xfc, 0x50, 0x21, 0xce, 0xa4, 0xbe, 0x09, 0xf3, 0x23, 0xb3,
+	0x7e, 0x26, 0xa0, 0x3a, 0x2c, 0x9e, 0x94, 0xd0, 0xb3, 0xe0, 0xc9, 0x9f, 0x21, 0xf8, 0xdb, 0x26,
+	0xa1, 0x5e, 0x8e, 0x37, 0x1d, 0xad, 0xb7, 0xe7, 0x0f, 0x03, 0x35, 0x98, 0x6e, 0xb1, 0x1b, 0x5e,
+	0x35, 0x06, 0x57, 0x3c, 0xc7, 0xcc, 0xae, 0x9e, 0x0f, 0x17, 0x7a, 0x78, 0x0c, 0x50, 0x0a, 0xad,
+	0xe1, 0xc1, 0xe0, 0x2e, 0x4c, 0xd9, 0xfc, 0xda, 0x55, 0x75, 0x7e, 0xef, 0x8a, 0xf3, 0xa3, 0x18,
+	0x39, 0x03, 0x42, 0xf7, 0xb2, 0x32, 0x69, 0x87, 0x56, 0xf2, 0x47, 0x08, 0xe6, 0x86, 0x7d, 0x74,
+	0x7b, 0xb6, 0xe5, 0x12, 0x7c, 0x3b, 0x7c, 0xdc, 0x1e, 0x71, 0x6d, 0xf8, 0x74, 0xde, 0x4a, 0x04,
+	0x27, 0x2e, 0x5e, 0x05, 0xa9, 0x2b, 0x5a, 0x54, 0xb8, 0x33, 0x1b, 0xd7, 0xbe, 0x5b, 0x09, 0x25,
+	0x90, 0x5b, 0x1f, 0x83, 0xb4, 0x49, 0x49, 0x57, 0xfe, 0x09, 0x41, 0x71, 0x93, 0xd0, 0xe8, 0x89,
+	0xed, 0xe7, 0xad, 0x02, 0xb9, 0x27, 0xa6, 0xe3, 0x52, 0xd5, 0x21, 0xfb, 0xa6, 0x7b, 0xda, 0xa4,
+	0x4d, 0x71, 0x1d, 0x45, 0xa8, 0xe0, 0x2a, 0xe4, 0x5d, 0xa2, 0xdb, 0x96, 0x31, 0x40, 0x49, 0x9e,
+	0x02, 0x25, 0xe7, 0x29, 0x05, 0x30, 0x47, 0x12, 0x9f, 0x3a, 0x53, 0xe2, 0x3f, 0x45, 0x30, 0x1f,
+	0x13, 0xa7, 0xc8, 0x7d, 0x35, 0xee, 0x86, 0x62, 0xf0, 0xa5, 0x91, 0x37, 0x14, 0xab, 0xc0, 0xd0,
+	0x25, 0xf5, 0x56, 0x85, 0xf8, 0x39, 0xe2, 0x60, 0x83, 0x38, 0xfb, 0xa6, 0x4e, 0xde, 0xc5, 0x4a,
+	0xb4, 0xa0, 0x14, 0x17, 0xa7, 0xa8, 0xc4, 0x12, 0x4c, 0xba, 0x1e, 0x8d, 0x5f, 0x02, 0x62, 0xfc,
+	0xce, 0x0a, 0x1a, 0x3b, 0x6f, 0x98, 0x88, 0xb8, 0x1e, 0x99, 0x84, 0xcb, 0xaf, 0xb0, 0x09, 0x25,
+	0xeb, 0xd1, 0x98, 0x84, 0x2b, 0xff, 0x8a, 0xe0, 0xfc, 0x70, 0xb5, 0x23, 0x27, 0xc2, 0x3b, 0x94,
+	0xcf, 0xcf, 0x11, 0x5c, 0x18, 0x11, 0xeb, 0x5f, 0xa7, 0xbb, 0x7f, 0x43, 0xb0, 0x78, 0x64, 0xfb,
+	0xad, 0x59, 0x46, 0xd5, 0x68, 0xbf, 0x93, 0x4d, 0xfe, 0x35, 0x82, 0xa5, 0x63, 0xe2, 0x15, 0x85,
+	0x51, 0x61, 0x7e, 0xa8, 0x30, 0xaa, 0x66, 0x19, 0x2a, 0x61, 0x42, 0x22, 0x76, 0x79, 0x74, 0x89,
+	0x7c, 0xb8, 0xad, 0x84, 0x32, 0xa7, 0xc7, 0x72, 0xde, 0xaa, 0x64, 0xf7, 0x20, 0xcd, 0x40, 0xd8,
+	0x9b, 0xc7, 0xb5, 0xfb, 0x8e, 0x4e, 0xd4, 0xe0, 0x8d, 0x25, 0x79, 0x84, 0x9a, 0xc1, 0x98, 0xc1,
+	0xa8, 0x2a, 0x5e, 0x15, 0x92, 0x3f, 0x77, 0xca, 0xdf, 0x25, 0x61, 0x2e, 0xde, 0xe5, 0x3f, 0xe3,
+	0x49, 0x80, 0xef, 0xc1, 0x94, 0x66, 0x18, 0x21, 0x84, 0xe4, 0xc9, 0xaf, 0x94, 0x49, 0xae, 0xe1,
+	0x23, 0x6c, 0x40, 0x9e, 0xbd, 0xeb, 0xf7, 0x43, 0x18, 0xa9, 0x93, 0x31, 0x72, 0x42, 0xc7, 0x47,
+	0xb9, 0x0e, 0x6c, 0xc8, 0x17, 0x55, 0xf3, 0x86, 0xd5, 0x42, 0x58, 0x9f, 0x45, 0xac, 0x48, 0x16,
+	0x79, 0xea, 0x85, 0x7e, 0x0b, 0xa6, 0x7c, 0xa3, 0x9e, 0x4a, 0x66, 0x84, 0xca, 0xa4, 0x10, 0xe3,
+	0x6a, 0x57, 0x3f, 0x41, 0x30, 0x13, 0xf3, 0x4b, 0x00, 0x2f, 0xc2, 0xf9, 0xca, 0xf6, 0x83, 0x9d,
+	0xdd, 0xe6, 0x5a, 0xb3, 0xb6, 0x5d, 0x57, 0x1b, 0x4d, 0x65, 0xad, 0x59, 0xdd, 0x7c, 0xa4, 0xd6,
+	0xea, 0x0f, 0xd7, 0xee, 0xd7, 0x36, 0x0a, 0x09, 0x5c, 0x86, 0x52, 0xac, 0xc4, 0x6e, 0xbd, 0x51,
+	0x6d, 0x16, 0xd0, 0x48, 0x7e, 0x63, 0xab, 0x7a, 0xff, 0x7e, 0x21, 0x89, 0x2f, 0xc2, 0x42, 0x2c,
+	0xbf, 0xbe, 0xd6, 0xac, 0x3d, 0xac, 0x16, 0x52, 0x57, 0x3f, 0x44, 0x00, 0x83, 0xb7, 0x16, 0x3e,
+	0x07, 0x33, 0x95, 0xad, 0xb5, 0xfa, 0x66, 0x55, 0x6d, 0x3e, 0xda, 0xa9, 0x86, 0x1c, 0x99, 0x81,
+	0x7c, 0x98, 0x51, 0xaf, 0xfe, 0xb7, 0x80, 0xf0, 0x1c, 0xe0, 0x30, 0x71, 0xa3, 0xa6, 0x54, 0x2b,
+	0xcd, 0x42, 0x12, 0x17, 0x61, 0x36, 0x8a, 0x22, 0x38, 0x29, 0xbc, 0x00, 0xe7, 0xc2, 0x9c, 0xdd,
+	0x7a, 0x63, 0xa7, 0x5a, 0xa9, 0xfd, 0xbb, 0x56, 0xdd, 0x28, 0xa4, 0x57, 0xbf, 0x4a, 0x41, 0xa6,
+	0xc9, 0x72, 0x88, 0x1f, 0x43, 0x2e, 0x3a, 0x69, 0xe1, 0xa5, 0x70, 0x8a, 0x63, 0x27, 0xc5, 0x92,
+	0x7c, 0x9c, 0x88, 0xb7, 0x6b, 0xe5, 0xc4, 0x3f, 0x10, 0x36, 0x60, 0xfa, 0xc8, 0xf6, 0xc6, 0x97,
+	0x86, 0x94, 0x63, 0x87, 0xaa, 0xd2, 0xe5, 0x13, 0xa4, 0x42, 0x56, 0x7a, 0x7c, 0xa0, 0x3d, 0x7a,
+	0xb2, 0xe3, 0xe5, 0xe3, 0x30, 0x22, 0x01, 0x5d, 0x39, 0x85, 0x64, 0xc8, 0xe2, 0xfb, 0x31, 0x53,
+	0x52, 0xb0, 0x69, 0xff, 0x7e, 0xac, 0xe7, 0x43, 0xa7, 0x79, 0xe9, 0xfa, 0x29, 0xa5, 0x07, 0xd6,
+	0xd7, 0x1f, 0xbf, 0x78, 0x55, 0x4e, 0xbc, 0x7c, 0x55, 0x4e, 0xbc, 0x79, 0x55, 0x46, 0x1f, 0x1c,
+	0x96, 0xd1, 0x17, 0x87, 0x65, 0xf4, 0xed, 0x61, 0x19, 0xbd, 0x38, 0x2c, 0xa3, 0x1f, 0x0f, 0xcb,
+	0xe8, 0x97, 0xc3, 0x72, 0xe2, 0xcd, 0x61, 0x19, 0x7d, 0xfc, 0xba, 0x9c, 0x78, 0xf1, 0xba, 0x9c,
+	0x78, 0xf9, 0xba, 0x9c, 0x80, 0x9c, 0x6e, 0x77, 0x43, 0xb6, 0xd6, 0x81, 0xd7, 0x7f, 0xc7, 0xb1,
+	0xa9, 0xbd, 0x83, 0xfe, 0x37, 0xce, 0x89, 0xbd, 0x56, 0x6b, 0x8c, 0xff, 0x2f, 0xbc, 0xf9, 0x47,
+	0x00, 0x00, 0x00, 0xff, 0xff, 0x06, 0xd1, 0x2f, 0x4f, 0x3e, 0x14, 0x00, 0x00,
 }
 
 func (x ComputationStrategy) String() string {
@@ -2060,6 +2349,202 @@ func (this *GetChangedTargetGraphResponse_Metadata) Equal(that interface{}) bool
 	}
 	return true
 }
+func (this *GetChangedTargetsAndEdgesRequest) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetChangedTargetsAndEdgesRequest)
+	if !ok {
+		that2, ok := that.(GetChangedTargetsAndEdgesRequest)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.FirstRevision.Equal(that1.FirstRevision) {
+		return false
+	}
+	if !this.SecondRevision.Equal(that1.SecondRevision) {
+		return false
+	}
+	if !this.OutputConfig.Equal(that1.OutputConfig) {
+		return false
+	}
+	return true
+}
+func (this *GetChangedTargetsAndEdgesResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetChangedTargetsAndEdgesResponse)
+	if !ok {
+		that2, ok := that.(GetChangedTargetsAndEdgesResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.Item == nil {
+		if this.Item != nil {
+			return false
+		}
+	} else if this.Item == nil {
+		return false
+	} else if !this.Item.Equal(that1.Item) {
+		return false
+	}
+	return true
+}
+func (this *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges)
+	if !ok {
+		that2, ok := that.(GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ChangedTargetsAndEdges.Equal(that1.ChangedTargetsAndEdges) {
+		return false
+	}
+	return true
+}
+func (this *GetChangedTargetsAndEdgesResponse_Metadata) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*GetChangedTargetsAndEdgesResponse_Metadata)
+	if !ok {
+		that2, ok := that.(GetChangedTargetsAndEdgesResponse_Metadata)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Metadata.Equal(that1.Metadata) {
+		return false
+	}
+	return true
+}
+func (this *Edge) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Edge)
+	if !ok {
+		that2, ok := that.(Edge)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.SourceId != that1.SourceId {
+		return false
+	}
+	if this.TargetId != that1.TargetId {
+		return false
+	}
+	return true
+}
+func (this *ChangedTargetsAndEdges) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ChangedTargetsAndEdges)
+	if !ok {
+		that2, ok := that.(ChangedTargetsAndEdges)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.ChangedTargets) != len(that1.ChangedTargets) {
+		return false
+	}
+	for i := range this.ChangedTargets {
+		if !this.ChangedTargets[i].Equal(that1.ChangedTargets[i]) {
+			return false
+		}
+	}
+	if len(this.AddedTargets) != len(that1.AddedTargets) {
+		return false
+	}
+	for i := range this.AddedTargets {
+		if !this.AddedTargets[i].Equal(that1.AddedTargets[i]) {
+			return false
+		}
+	}
+	if len(this.RemovedTargets) != len(that1.RemovedTargets) {
+		return false
+	}
+	for i := range this.RemovedTargets {
+		if !this.RemovedTargets[i].Equal(that1.RemovedTargets[i]) {
+			return false
+		}
+	}
+	if len(this.NewEdges) != len(that1.NewEdges) {
+		return false
+	}
+	for i := range this.NewEdges {
+		if !this.NewEdges[i].Equal(that1.NewEdges[i]) {
+			return false
+		}
+	}
+	if len(this.RemovedEdges) != len(that1.RemovedEdges) {
+		return false
+	}
+	for i := range this.RemovedEdges {
+		if !this.RemovedEdges[i].Equal(that1.RemovedEdges[i]) {
+			return false
+		}
+	}
+	return true
+}
 func (this *Request) GoString() string {
 	if this == nil {
 		return "nil"
@@ -2408,6 +2893,87 @@ func (this *GetChangedTargetGraphResponse_Metadata) GoString() string {
 	s := strings.Join([]string{`&tangopb.GetChangedTargetGraphResponse_Metadata{` +
 		`Metadata:` + fmt.Sprintf("%#v", this.Metadata) + `}`}, ", ")
 	return s
+}
+func (this *GetChangedTargetsAndEdgesRequest) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&tangopb.GetChangedTargetsAndEdgesRequest{")
+	if this.FirstRevision != nil {
+		s = append(s, "FirstRevision: "+fmt.Sprintf("%#v", this.FirstRevision)+",\n")
+	}
+	if this.SecondRevision != nil {
+		s = append(s, "SecondRevision: "+fmt.Sprintf("%#v", this.SecondRevision)+",\n")
+	}
+	if this.OutputConfig != nil {
+		s = append(s, "OutputConfig: "+fmt.Sprintf("%#v", this.OutputConfig)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetChangedTargetsAndEdgesResponse) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&tangopb.GetChangedTargetsAndEdgesResponse{")
+	if this.Item != nil {
+		s = append(s, "Item: "+fmt.Sprintf("%#v", this.Item)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tangopb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{` +
+		`ChangedTargetsAndEdges:` + fmt.Sprintf("%#v", this.ChangedTargetsAndEdges) + `}`}, ", ")
+	return s
+}
+func (this *GetChangedTargetsAndEdgesResponse_Metadata) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&tangopb.GetChangedTargetsAndEdgesResponse_Metadata{` +
+		`Metadata:` + fmt.Sprintf("%#v", this.Metadata) + `}`}, ", ")
+	return s
+}
+func (this *Edge) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&tangopb.Edge{")
+	s = append(s, "SourceId: "+fmt.Sprintf("%#v", this.SourceId)+",\n")
+	s = append(s, "TargetId: "+fmt.Sprintf("%#v", this.TargetId)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ChangedTargetsAndEdges) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 9)
+	s = append(s, "&tangopb.ChangedTargetsAndEdges{")
+	if this.ChangedTargets != nil {
+		s = append(s, "ChangedTargets: "+fmt.Sprintf("%#v", this.ChangedTargets)+",\n")
+	}
+	if this.AddedTargets != nil {
+		s = append(s, "AddedTargets: "+fmt.Sprintf("%#v", this.AddedTargets)+",\n")
+	}
+	if this.RemovedTargets != nil {
+		s = append(s, "RemovedTargets: "+fmt.Sprintf("%#v", this.RemovedTargets)+",\n")
+	}
+	if this.NewEdges != nil {
+		s = append(s, "NewEdges: "+fmt.Sprintf("%#v", this.NewEdges)+",\n")
+	}
+	if this.RemovedEdges != nil {
+		s = append(s, "RemovedEdges: "+fmt.Sprintf("%#v", this.RemovedEdges)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
 }
 func valueToGoStringTango(v interface{}, typ string) string {
 	rv := reflect.ValueOf(v)
@@ -3425,6 +3991,265 @@ func (m *GetChangedTargetGraphResponse_Metadata) MarshalToSizedBuffer(dAtA []byt
 	}
 	return len(dAtA) - i, nil
 }
+func (m *GetChangedTargetsAndEdgesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetChangedTargetsAndEdgesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetChangedTargetsAndEdgesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.OutputConfig != nil {
+		{
+			size, err := m.OutputConfig.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTango(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.SecondRevision != nil {
+		{
+			size, err := m.SecondRevision.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTango(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.FirstRevision != nil {
+		{
+			size, err := m.FirstRevision.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTango(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Item != nil {
+		{
+			size := m.Item.Size()
+			i -= size
+			if _, err := m.Item.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ChangedTargetsAndEdges != nil {
+		{
+			size, err := m.ChangedTargetsAndEdges.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTango(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *GetChangedTargetsAndEdgesResponse_Metadata) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GetChangedTargetsAndEdgesResponse_Metadata) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Metadata != nil {
+		{
+			size, err := m.Metadata.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTango(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *Edge) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Edge) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Edge) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TargetId != 0 {
+		i = encodeVarintTango(dAtA, i, uint64(m.TargetId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.SourceId != 0 {
+		i = encodeVarintTango(dAtA, i, uint64(m.SourceId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ChangedTargetsAndEdges) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ChangedTargetsAndEdges) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ChangedTargetsAndEdges) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.RemovedEdges) > 0 {
+		for iNdEx := len(m.RemovedEdges) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemovedEdges[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTango(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.NewEdges) > 0 {
+		for iNdEx := len(m.NewEdges) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.NewEdges[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTango(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.RemovedTargets) > 0 {
+		for iNdEx := len(m.RemovedTargets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.RemovedTargets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTango(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.AddedTargets) > 0 {
+		for iNdEx := len(m.AddedTargets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.AddedTargets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTango(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.ChangedTargets) > 0 {
+		for iNdEx := len(m.ChangedTargets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.ChangedTargets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTango(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTango(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTango(v)
 	base := offset
@@ -3862,6 +4687,116 @@ func (m *GetChangedTargetGraphResponse_Metadata) Size() (n int) {
 	}
 	return n
 }
+func (m *GetChangedTargetsAndEdgesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.FirstRevision != nil {
+		l = m.FirstRevision.Size()
+		n += 1 + l + sovTango(uint64(l))
+	}
+	if m.SecondRevision != nil {
+		l = m.SecondRevision.Size()
+		n += 1 + l + sovTango(uint64(l))
+	}
+	if m.OutputConfig != nil {
+		l = m.OutputConfig.Size()
+		n += 1 + l + sovTango(uint64(l))
+	}
+	return n
+}
+
+func (m *GetChangedTargetsAndEdgesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Item != nil {
+		n += m.Item.Size()
+	}
+	return n
+}
+
+func (m *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ChangedTargetsAndEdges != nil {
+		l = m.ChangedTargetsAndEdges.Size()
+		n += 1 + l + sovTango(uint64(l))
+	}
+	return n
+}
+func (m *GetChangedTargetsAndEdgesResponse_Metadata) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Metadata != nil {
+		l = m.Metadata.Size()
+		n += 1 + l + sovTango(uint64(l))
+	}
+	return n
+}
+func (m *Edge) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SourceId != 0 {
+		n += 1 + sovTango(uint64(m.SourceId))
+	}
+	if m.TargetId != 0 {
+		n += 1 + sovTango(uint64(m.TargetId))
+	}
+	return n
+}
+
+func (m *ChangedTargetsAndEdges) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.ChangedTargets) > 0 {
+		for _, e := range m.ChangedTargets {
+			l = e.Size()
+			n += 1 + l + sovTango(uint64(l))
+		}
+	}
+	if len(m.AddedTargets) > 0 {
+		for _, e := range m.AddedTargets {
+			l = e.Size()
+			n += 1 + l + sovTango(uint64(l))
+		}
+	}
+	if len(m.RemovedTargets) > 0 {
+		for _, e := range m.RemovedTargets {
+			l = e.Size()
+			n += 1 + l + sovTango(uint64(l))
+		}
+	}
+	if len(m.NewEdges) > 0 {
+		for _, e := range m.NewEdges {
+			l = e.Size()
+			n += 1 + l + sovTango(uint64(l))
+		}
+	}
+	if len(m.RemovedEdges) > 0 {
+		for _, e := range m.RemovedEdges {
+			l = e.Size()
+			n += 1 + l + sovTango(uint64(l))
+		}
+	}
+	return n
+}
 
 func sovTango(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
@@ -4191,6 +5126,98 @@ func (this *GetChangedTargetGraphResponse_Metadata) String() string {
 	}
 	s := strings.Join([]string{`&GetChangedTargetGraphResponse_Metadata{`,
 		`Metadata:` + strings.Replace(fmt.Sprintf("%v", this.Metadata), "Metadata", "Metadata", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetChangedTargetsAndEdgesRequest) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetChangedTargetsAndEdgesRequest{`,
+		`FirstRevision:` + strings.Replace(this.FirstRevision.String(), "BuildDescription", "BuildDescription", 1) + `,`,
+		`SecondRevision:` + strings.Replace(this.SecondRevision.String(), "BuildDescription", "BuildDescription", 1) + `,`,
+		`OutputConfig:` + strings.Replace(this.OutputConfig.String(), "OutputConfig", "OutputConfig", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetChangedTargetsAndEdgesResponse) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetChangedTargetsAndEdgesResponse{`,
+		`Item:` + fmt.Sprintf("%v", this.Item) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{`,
+		`ChangedTargetsAndEdges:` + strings.Replace(fmt.Sprintf("%v", this.ChangedTargetsAndEdges), "ChangedTargetsAndEdges", "ChangedTargetsAndEdges", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *GetChangedTargetsAndEdgesResponse_Metadata) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&GetChangedTargetsAndEdgesResponse_Metadata{`,
+		`Metadata:` + strings.Replace(fmt.Sprintf("%v", this.Metadata), "Metadata", "Metadata", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Edge) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Edge{`,
+		`SourceId:` + fmt.Sprintf("%v", this.SourceId) + `,`,
+		`TargetId:` + fmt.Sprintf("%v", this.TargetId) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ChangedTargetsAndEdges) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForChangedTargets := "[]*ChangedTarget{"
+	for _, f := range this.ChangedTargets {
+		repeatedStringForChangedTargets += strings.Replace(f.String(), "ChangedTarget", "ChangedTarget", 1) + ","
+	}
+	repeatedStringForChangedTargets += "}"
+	repeatedStringForAddedTargets := "[]*OptimizedTarget{"
+	for _, f := range this.AddedTargets {
+		repeatedStringForAddedTargets += strings.Replace(f.String(), "OptimizedTarget", "OptimizedTarget", 1) + ","
+	}
+	repeatedStringForAddedTargets += "}"
+	repeatedStringForRemovedTargets := "[]*OptimizedTarget{"
+	for _, f := range this.RemovedTargets {
+		repeatedStringForRemovedTargets += strings.Replace(f.String(), "OptimizedTarget", "OptimizedTarget", 1) + ","
+	}
+	repeatedStringForRemovedTargets += "}"
+	repeatedStringForNewEdges := "[]*Edge{"
+	for _, f := range this.NewEdges {
+		repeatedStringForNewEdges += strings.Replace(f.String(), "Edge", "Edge", 1) + ","
+	}
+	repeatedStringForNewEdges += "}"
+	repeatedStringForRemovedEdges := "[]*Edge{"
+	for _, f := range this.RemovedEdges {
+		repeatedStringForRemovedEdges += strings.Replace(f.String(), "Edge", "Edge", 1) + ","
+	}
+	repeatedStringForRemovedEdges += "}"
+	s := strings.Join([]string{`&ChangedTargetsAndEdges{`,
+		`ChangedTargets:` + repeatedStringForChangedTargets + `,`,
+		`AddedTargets:` + repeatedStringForAddedTargets + `,`,
+		`RemovedTargets:` + repeatedStringForRemovedTargets + `,`,
+		`NewEdges:` + repeatedStringForNewEdges + `,`,
+		`RemovedEdges:` + repeatedStringForRemovedEdges + `,`,
 		`}`,
 	}, "")
 	return s
@@ -7055,6 +8082,592 @@ func (m *GetChangedTargetGraphResponse) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			m.Item = &GetChangedTargetGraphResponse_Metadata{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTango(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTango
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetChangedTargetsAndEdgesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTango
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetChangedTargetsAndEdgesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetChangedTargetsAndEdgesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FirstRevision", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.FirstRevision == nil {
+				m.FirstRevision = &BuildDescription{}
+			}
+			if err := m.FirstRevision.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SecondRevision", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.SecondRevision == nil {
+				m.SecondRevision = &BuildDescription{}
+			}
+			if err := m.SecondRevision.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OutputConfig", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.OutputConfig == nil {
+				m.OutputConfig = &OutputConfig{}
+			}
+			if err := m.OutputConfig.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTango(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTango
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GetChangedTargetsAndEdgesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTango
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GetChangedTargetsAndEdgesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GetChangedTargetsAndEdgesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ChangedTargetsAndEdges", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ChangedTargetsAndEdges{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Item = &GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{v}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Metadata", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &Metadata{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Item = &GetChangedTargetsAndEdgesResponse_Metadata{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTango(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTango
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Edge) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTango
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Edge: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Edge: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SourceId", wireType)
+			}
+			m.SourceId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.SourceId |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TargetId", wireType)
+			}
+			m.TargetId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TargetId |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTango(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTango
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ChangedTargetsAndEdges) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTango
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ChangedTargetsAndEdges: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ChangedTargetsAndEdges: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ChangedTargets", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ChangedTargets = append(m.ChangedTargets, &ChangedTarget{})
+			if err := m.ChangedTargets[len(m.ChangedTargets)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddedTargets", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddedTargets = append(m.AddedTargets, &OptimizedTarget{})
+			if err := m.AddedTargets[len(m.AddedTargets)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemovedTargets", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemovedTargets = append(m.RemovedTargets, &OptimizedTarget{})
+			if err := m.RemovedTargets[len(m.RemovedTargets)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NewEdges", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NewEdges = append(m.NewEdges, &Edge{})
+			if err := m.NewEdges[len(m.NewEdges)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemovedEdges", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTango
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTango
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTango
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RemovedEdges = append(m.RemovedEdges, &Edge{})
+			if err := m.RemovedEdges[len(m.RemovedEdges)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
