@@ -450,13 +450,6 @@ func (c *controller) compareTargetGraphsAndEdges(ctx context.Context, firstGraph
 	firstEdges = nil
 
 	// 10) Build canonical metadata.
-	meta := &pb.Metadata{
-		TargetIdMapping:             targetMapper.Invert(),
-		RuleTypeMapping:             ruleTypeMapper.Invert(),
-		TagMapping:                  tagMapper.Invert(),
-		AttributeNameMapping:        attrNameMapper.Invert(),
-		AttributeStringValueMapping: attrValMapper.Invert(),
-	}
 
 	totalDuration := time.Since(start)
 	c.logger.Info("compareTargetGraphsAndEdges: Done",
@@ -464,24 +457,62 @@ func (c *controller) compareTargetGraphsAndEdges(ctx context.Context, firstGraph
 	)
 	scope.Timer("total_duration").Record(totalDuration)
 
-	return []*pb.GetChangedTargetsAndEdgesResponse{
-		{
+	// Chunk changed/added/removed targets to stay within the 64MB default gRPC per-message limit.
+	var responses []*pb.GetChangedTargetsAndEdgesResponse
+	for i := 0; i < len(changed); i += c.changedTargetChunkSize {
+		end := min(i+c.changedTargetChunkSize, len(changed))
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
 			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
-				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{
-					ChangedTargets: changed,
-					AddedTargets:   addedTargets,
-					RemovedTargets: removedTargets,
-					NewEdges:       newEdges,
-					RemovedEdges:   removedEdges,
-				},
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{ChangedTargets: changed[i:end]},
 			},
-		},
-		{
-			Item: &pb.GetChangedTargetsAndEdgesResponse_Metadata{
-				Metadata: meta,
+		})
+	}
+	for i := 0; i < len(addedTargets); i += c.targetChunkSize {
+		end := min(i+c.targetChunkSize, len(addedTargets))
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{AddedTargets: addedTargets[i:end]},
 			},
-		},
-	}, nil
+		})
+	}
+	for i := 0; i < len(removedTargets); i += c.targetChunkSize {
+		end := min(i+c.targetChunkSize, len(removedTargets))
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{RemovedTargets: removedTargets[i:end]},
+			},
+		})
+	}
+	// Edges are tiny (2 int32s each) and always fit in one message.
+	if len(newEdges) > 0 || len(removedEdges) > 0 {
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{NewEdges: newEdges, RemovedEdges: removedEdges},
+			},
+		})
+	}
+	// Emit an empty chunk when there are no changes at all, so the stream is never empty.
+	if len(responses) == 0 {
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{},
+			},
+		})
+	}
+	for _, meta := range common.ChunkMetadata(
+		targetMapper.Invert(),
+		ruleTypeMapper.Invert(),
+		tagMapper.Invert(),
+		attrNameMapper.Invert(),
+		attrValMapper.Invert(),
+		c.metadataMapChunkSize,
+	) {
+		responses = append(responses, &pb.GetChangedTargetsAndEdgesResponse{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_Metadata{Metadata: meta},
+		})
+	}
+
+	return responses, nil
 }
 
 // buildEdgeSet constructs a set of (source, dep) name pairs from all direct dependencies in the graph.
