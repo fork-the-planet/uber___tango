@@ -1070,3 +1070,77 @@ func TestGetChangedTargetsAndEdges_CacheWriteAfterCompute(t *testing.T) {
 	}
 	assert.True(t, foundA, "A must appear in changed_targets")
 }
+
+// --- sendWithDistanceFilterForEdges ---
+
+func TestSendWithDistanceFilterForEdges_NonChangedTargetFieldsPreserved(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	stream := tangomock.NewMockTangoServiceGetChangedTargetsAndEdgesYARPCServer(ctrl)
+
+	// changed_targets contain a mix that will be filtered; added/removed/edges
+	// and metadata must pass through verbatim regardless of distance bound.
+	addedTargets := []*pb.OptimizedTarget{{Id: 100}, {Id: 101}}
+	removedTargets := []*pb.OptimizedTarget{{Id: 200}}
+	newEdges := []*pb.Edge{{SourceId: 1, TargetId: 2}, {SourceId: 3, TargetId: 4}}
+	removedEdges := []*pb.Edge{{SourceId: 5, TargetId: 6}}
+	meta := &pb.Metadata{TargetIdMapping: map[int32]string{1: "//app:T"}}
+
+	responses := []*pb.GetChangedTargetsAndEdgesResponse{
+		{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{
+					ChangedTargets: []*pb.ChangedTarget{
+						{Distance: 0, ChangeType: pb.CHANGE_TYPE_DIRECT},
+						{Distance: 99, ChangeType: pb.CHANGE_TYPE_INDIRECT}, // filtered
+						{Distance: -1, ChangeType: pb.CHANGE_TYPE_NEW},      // filtered
+					},
+					AddedTargets:   addedTargets,
+					RemovedTargets: removedTargets,
+					NewEdges:       newEdges,
+					RemovedEdges:   removedEdges,
+				},
+			},
+		},
+		{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_Metadata{Metadata: meta},
+		},
+	}
+
+	var sent []*pb.GetChangedTargetsAndEdgesResponse
+	stream.EXPECT().Send(gomock.Any()).DoAndReturn(func(r *pb.GetChangedTargetsAndEdgesResponse, _ ...any) error {
+		sent = append(sent, r)
+		return nil
+	}).Times(2)
+
+	require.NoError(t, sendWithDistanceFilterForEdges(stream, responses, &pb.OutputConfig{ComputeDistances: true, MaxDistance: 1}))
+
+	cte := sent[0].GetChangedTargetsAndEdges()
+	require.Len(t, cte.GetChangedTargets(), 1, "only distance-0 target should survive")
+	assert.Equal(t, int32(0), cte.GetChangedTargets()[0].GetDistance())
+
+	// All non-changed-target fields preserved verbatim.
+	assert.Equal(t, addedTargets, cte.GetAddedTargets())
+	assert.Equal(t, removedTargets, cte.GetRemovedTargets())
+	assert.Equal(t, newEdges, cte.GetNewEdges())
+	assert.Equal(t, removedEdges, cte.GetRemovedEdges())
+	assert.Equal(t, meta, sent[1].GetMetadata())
+}
+
+func TestSendWithDistanceFilterForEdges_SendError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	stream := tangomock.NewMockTangoServiceGetChangedTargetsAndEdgesYARPCServer(ctrl)
+
+	responses := []*pb.GetChangedTargetsAndEdgesResponse{
+		{
+			Item: &pb.GetChangedTargetsAndEdgesResponse_ChangedTargetsAndEdges{
+				ChangedTargetsAndEdges: &pb.ChangedTargetsAndEdges{},
+			},
+		},
+	}
+
+	stream.EXPECT().Send(gomock.Any()).Return(errors.New("send error"))
+
+	err := sendWithDistanceFilterForEdges(stream, responses, &pb.OutputConfig{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "send error")
+}
