@@ -28,11 +28,12 @@ import (
 // Params are the parameters for the controller.
 type Params struct {
 	fx.In
-	Logger       *zap.Logger
-	Storage      storage.Storage
-	Orchestrator orchestrator.Orchestrator
-	Scope        tally.Scope        `optional:"true"`
-	ChunkConfig  config.ChunkConfig `optional:"true"`
+	Logger             *zap.Logger
+	Storage            storage.Storage
+	Orchestrator       orchestrator.Orchestrator
+	Scope              tally.Scope                     `optional:"true"`
+	ChunkConfig        config.ChunkConfig              `optional:"true"`
+	RepoConfigProvider config.RepositoryConfigProvider `optional:"true"`
 }
 
 type controller struct {
@@ -43,6 +44,7 @@ type controller struct {
 	targetChunkSize        int
 	changedTargetChunkSize int
 	metadataMapChunkSize   int
+	repoConfigProvider     config.RepositoryConfigProvider
 }
 
 // NewController creates a new controller.
@@ -71,5 +73,16 @@ func NewController(p Params) pb.TangoYARPCServer {
 		targetChunkSize:        targetChunkSize,
 		changedTargetChunkSize: changedTargetChunkSize,
 		metadataMapChunkSize:   metadataMapChunkSize,
+		repoConfigProvider:     p.RepoConfigProvider,
 	}
+}
+
+// getRepoConfig returns the RepositoryConfig for the given remote, or a
+// zero-value config when no provider is configured or the remote is unknown.
+func (c *controller) getRepoConfig(remote string) config.RepositoryConfig {
+	if c.repoConfigProvider == nil {
+		return config.RepositoryConfig{}
+	}
+	repoConfig, _ := c.repoConfigProvider.GetRepositoryConfig(remote)
+	return repoConfig
 }

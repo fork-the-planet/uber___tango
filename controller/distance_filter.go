@@ -14,14 +14,27 @@
 
 package controller
 
-import pb "github.com/uber/tango/tangopb"
+import (
+	"github.com/uber/tango/config"
+	pb "github.com/uber/tango/tangopb"
+)
 
-// maxDistanceFromOutputConfig returns the BFS distance cap for filtering
-// changed targets, or -1 when filtering is disabled. A non-negative value
-// means only targets with 0 <= distance <= max should be kept.
-func maxDistanceFromOutputConfig(cfg *pb.OutputConfig) int32 {
-	if cfg.GetComputeDistances() {
-		return cfg.GetMaxDistance()
+// resolveMaxDistance returns the effective BFS distance cap for filtering, or
+// -1 when no filtering should be applied.
+//
+// Priority (highest first):
+//  1. outputConfig.max_distance > 0 → use the client's explicit limit.
+//  2. repoConfig.MaxDistance > 0 → server-side default.
+//  3. Neither set → -1 (no distance filtering).
+//
+// Note: outputConfig.compute_distances controls whether the distance field is
+// populated in the response and is independent of filtering.
+func resolveMaxDistance(repoConfig config.RepositoryConfig, outputConfig *pb.OutputConfig) int32 {
+	if outputConfig.GetMaxDistance() > 0 {
+		return outputConfig.GetMaxDistance()
+	}
+	if repoConfig.MaxDistance > 0 {
+		return repoConfig.MaxDistance
 	}
 	return -1
 }
