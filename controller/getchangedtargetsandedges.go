@@ -44,14 +44,17 @@ func (c *controller) GetChangedTargetsAndEdges(request *pb.GetChangedTargetsAndE
 	defer func() {
 		if retErr != nil {
 			scope.Counter("failure").Inc(1)
+			emitFailureMetric(scope, retErr)
 		} else {
 			scope.Counter("success").Inc(1)
 		}
 	}()
 	if err := validateGetChangedTargetsAndEdgesRequest(request); err != nil {
 		c.logger.Error("GetChangedTargetsAndEdges: Invalid request", zap.Error(err))
-		return err
+		return common.WithReason(failureReasonValidation, common.ErrorTypeUser, err)
 	}
+	scope = scope.Tagged(map[string]string{"repo": common.ToShortRemote(request.GetFirstRevision().GetRemote())})
+	scope.Counter("calls").Inc(1)
 	ctx := stream.Context()
 	start := time.Now()
 	logger := c.logger.With(
@@ -101,7 +104,7 @@ func (c *controller) GetChangedTargetsAndEdges(request *pb.GetChangedTargetsAndE
 					scope.Timer("cache_read_duration").Record(cacheReadDuration)
 					if err := sendWithDistanceFilterForEdges(stream, cached, maxDist); err != nil {
 						logger.Error("GetChangedTargetsAndEdges: Failed to send cached response", zap.Error(err))
-						return err
+						return common.WithReason(failureReasonSend, common.ErrorTypeInfra, err)
 					}
 					totalDuration := time.Since(start)
 					logger.Info("GetChangedTargetsAndEdges: Successfully streamed from cache",
@@ -192,7 +195,7 @@ func (c *controller) GetChangedTargetsAndEdges(request *pb.GetChangedTargetsAndE
 	scope.Timer("graph_fetch_duration").Record(graphFetchDuration)
 
 	if ctx.Err() != nil {
-		return ctx.Err()
+		return common.WithReason(failureReasonCancelled, common.ErrorTypeUser, ctx.Err())
 	}
 
 	var err error
@@ -221,7 +224,7 @@ func (c *controller) GetChangedTargetsAndEdges(request *pb.GetChangedTargetsAndE
 	secondGraph = nil
 	if err != nil {
 		logger.Error("GetChangedTargetsAndEdges: Failed to compare target graphs", zap.Error(err))
-		return fmt.Errorf("failed to compare target graphs: %w", err)
+		return common.WithReason(failureReasonCompare, common.ErrorTypeInfra, fmt.Errorf("failed to compare target graphs: %w", err))
 	}
 	compareDuration := time.Since(compareStart)
 	logger.Info("GetChangedTargetsAndEdges: Target graphs compared",
@@ -245,7 +248,7 @@ func (c *controller) GetChangedTargetsAndEdges(request *pb.GetChangedTargetsAndE
 	sendStart := time.Now()
 	if err := sendWithDistanceFilterForEdges(stream, responses, maxDist); err != nil {
 		logger.Error("GetChangedTargetsAndEdges: Failed to send response", zap.Error(err))
-		return err
+		return common.WithReason(failureReasonSend, common.ErrorTypeInfra, err)
 	}
 	sendDuration := time.Since(sendStart)
 	scope.Timer("send_duration").Record(sendDuration)

@@ -35,6 +35,7 @@ func (c *controller) GetTargetGraph(request *pb.GetTargetGraphRequest, stream pb
 	defer func() {
 		if retErr != nil {
 			scope.Counter("failure").Inc(1)
+			emitFailureMetric(scope, retErr)
 		} else {
 			scope.Counter("success").Inc(1)
 		}
@@ -44,6 +45,8 @@ func (c *controller) GetTargetGraph(request *pb.GetTargetGraphRequest, stream pb
 	logger := c.logger.With(
 		zap.Any("build_description", request.GetBuildDescription()),
 	)
+	scope = scope.Tagged(map[string]string{"repo": common.ToShortRemote(request.GetBuildDescription().GetRemote())})
+	scope.Counter("calls").Inc(1)
 	graphReader, err := c.getGraph(ctx, request.GetBuildDescription(), request.GetOutputConfig(), request.GetRequestOptions(), request.GetBypassCache())
 	if err != nil {
 		return err
@@ -68,11 +71,11 @@ func (c *controller) GetTargetGraph(request *pb.GetTargetGraphRequest, stream pb
 			return nil
 		}
 		if err != nil {
-			return err
+			return common.WithReason(failureReasonGraphFetch, common.ErrorTypeInfra, err)
 		}
 		err = stream.Send(graphStreamChunk)
 		if err != nil {
-			return fmt.Errorf("send graph: %w", err)
+			return common.WithReason(failureReasonSend, common.ErrorTypeInfra, fmt.Errorf("send graph: %w", err))
 		}
 	}
 }
