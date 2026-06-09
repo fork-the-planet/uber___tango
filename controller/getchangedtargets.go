@@ -118,6 +118,7 @@ func (c *controller) GetChangedTargets(request *pb.GetChangedTargetsRequest, str
 						zap.Duration("total_duration", totalDuration),
 					)
 					scope.Timer("total_duration").Record(totalDuration)
+					scope.Histogram("total_duration.histogram", c.totalDurationBuckets).RecordDuration(totalDuration)
 					return nil
 				}
 			}
@@ -284,6 +285,7 @@ func (c *controller) GetChangedTargets(request *pb.GetChangedTargetsRequest, str
 		zap.Duration("total_duration", totalDuration),
 	)
 	scope.Timer("total_duration").Record(totalDuration)
+	scope.Histogram("total_duration.histogram", c.totalDurationBuckets).RecordDuration(totalDuration)
 	return nil
 }
 
