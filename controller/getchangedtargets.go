@@ -115,7 +115,7 @@ func (c *controller) GetChangedTargets(request *pb.GetChangedTargetsRequest, str
 					)
 					scope.Counter("cache_hit").Inc(1)
 					scope.Timer("cache_read_duration").Record(cacheReadDuration)
-					if sendErr := sendWithDistanceFilter(stream, cached, maxDist); sendErr != nil {
+					if sendErr := sendTrimmedChangedTargets(stream, cached, maxDist, request.GetOutputConfig()); sendErr != nil {
 						logger.Error("GetChangedTargets: Failed to send cached response", zap.Error(sendErr))
 						return common.WithReason(failureReasonSend, common.ErrorTypeInfra, fmt.Errorf("failed to send cached response: %w", sendErr))
 					}
@@ -278,7 +278,7 @@ func (c *controller) GetChangedTargets(request *pb.GetChangedTargetsRequest, str
 	}()
 
 	sendStart := time.Now()
-	if err := sendWithDistanceFilter(stream, changedTargetsResponses, maxDist); err != nil {
+	if err := sendTrimmedChangedTargets(stream, changedTargetsResponses, maxDist, request.GetOutputConfig()); err != nil {
 		logger.Error("GetChangedTargets: Failed to send response", zap.Error(err))
 		return common.WithReason(failureReasonSend, common.ErrorTypeInfra, fmt.Errorf("failed to send response: %w", err))
 	}
@@ -854,19 +854,35 @@ func transposeOptimizedTarget(
 	return dst
 }
 
-// sendWithDistanceFilter streams responses to the client, filtering changed targets to those
-// within maxDist from any distance-0 seed when maxDist >= 0.
-// Metadata and other non-target responses are always forwarded.
-// Filtering and sending are combined into a single pass to avoid an intermediate allocation.
-func sendWithDistanceFilter(stream pb.TangoServiceGetChangedTargetsYARPCServer, responses []*pb.GetChangedTargetsResponse, maxDist int32) error {
+// sendTrimmedChangedTargets streams responses to the client, filtering changed targets to those
+// within maxDist from any distance-0 seed when maxDist >= 0, stripping per-target
+// hash/tags/attributes per outputConfig's include_* flags, and pruning metadata mappings
+// whose IDs are no longer referenced. Filtering and sending are combined into a single pass
+// to avoid an intermediate allocation.
+func sendTrimmedChangedTargets(stream pb.TangoServiceGetChangedTargetsYARPCServer, responses []*pb.GetChangedTargetsResponse, maxDist int32, outputConfig *pb.OutputConfig) error {
+	stripFields := optimizedTargetNeedsStripping(outputConfig)
+	pruneMeta := metadataNeedsPruning(outputConfig)
 	for _, resp := range responses {
 		toSend := resp
-		if maxDist >= 0 {
-			if ct, ok := resp.GetItem().(*pb.GetChangedTargetsResponse_ChangedTargets); ok {
-				kept := filterChangedTargetsByDistance(ct.ChangedTargets.GetChangedTargets(), maxDist)
+		switch item := resp.GetItem().(type) {
+		case *pb.GetChangedTargetsResponse_ChangedTargets:
+			if maxDist >= 0 || stripFields {
+				kept := item.ChangedTargets.GetChangedTargets()
+				if maxDist >= 0 {
+					kept = filterChangedTargetsByDistance(kept, maxDist)
+				}
+				kept = applyChangedTargetsOutputConfig(kept, outputConfig)
 				toSend = &pb.GetChangedTargetsResponse{
 					Item: &pb.GetChangedTargetsResponse_ChangedTargets{
 						ChangedTargets: &pb.ChangedTargets{ChangedTargets: kept},
+					},
+				}
+			}
+		case *pb.GetChangedTargetsResponse_Metadata:
+			if pruneMeta {
+				toSend = &pb.GetChangedTargetsResponse{
+					Item: &pb.GetChangedTargetsResponse_Metadata{
+						Metadata: applyMetadataOutputConfig(item.Metadata, outputConfig),
 					},
 				}
 			}
