@@ -116,32 +116,29 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 	// parse the config file
 	cfg, err := config.Parse(b.configFilePath)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error parsing config file", zap.String("configFilePath", b.configFilePath), zap.Error(err))
-		return nil, common.WithReason(failureReasonConfigParse, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("parse config %q: %w", b.configFilePath, err)
 	}
 	remote := param.Req.BuildDescription.Remote
 	repoCfg, ok := cfg.GetRepositoryConfig(remote)
 	if !ok {
-		return nil, common.WithReason(failureReasonNoRepoConfig, common.ErrorTypeUser, fmt.Errorf("no repository configuration found for remote %q", remote))
+		return nil, fmt.Errorf("no repository configuration found for remote %q", remote)
 	}
 	ws, err := b.repoManager.Lease(ctx, *param.Req.BuildDescription)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error leasing workspace", zap.Error(err))
-		return nil, common.WithReason(failureReasonWorkspaceLease, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("lease workspace: %w", err)
 	}
 	defer func() {
 		err := ws.Release()
 		if err != nil {
 			// clean up the workspace if release fails.
 			if removeErr := os.RemoveAll(ws.Path()); removeErr != nil {
-				logger.Errorf("GetTargetGraph: Failed to remove workspace: %v", removeErr)
+				logger.Errorw("GetTargetGraph: Failed to remove workspace", zap.Error(removeErr))
 			}
 		}
 	}()
 	err = ws.Checkout(ctx, param.Req.BuildDescription.Remote, param.Req.BuildDescription.BaseSha)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error checking out base revision", zap.Error(err))
-		return nil, common.WithReason(failureReasonWorkspaceCheckout, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("checkout %s@%s: %w", param.Req.BuildDescription.Remote, param.Req.BuildDescription.BaseSha, err)
 	}
 	logger.Infow("GetTargetGraph: Checked out base revision")
 
@@ -155,23 +152,20 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 	for _, req := range param.Req.BuildDescription.Requests {
 		request, err := workspace.NewRequest(req.GetUrl(), gitModule, param.Req.BuildDescription.BaseSha, req.GetCommit(), logger)
 		if err != nil {
-			logger.Errorw("GetTargetGraph: Error creating request", zap.String("url", req.GetUrl()), zap.Error(err))
-			return nil, common.WithReason(failureReasonRequestCreate, common.ErrorTypeInfra, err)
+			return nil, fmt.Errorf("create request for %q: %w", req.GetUrl(), err)
 		}
 		requests = append(requests, request)
 	}
 	err = ws.ApplyRequests(ctx, requests)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error applying requests to workspace", zap.Error(err))
-		return nil, common.WithReason(failureReasonRequestApply, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("apply requests: %w", err)
 	}
 	logger.Infow("GetTargetGraph: Applied requests", zap.Int("request_count", len(requests)))
 
 	// Compute the treehash and download the target graph from storage if exists.
 	treehash, err := gitModule.RevParse(ctx, "HEAD^{tree}")
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Treehash computation failed", zap.Error(err))
-		return nil, common.WithReason(failureReasonTreehashCompute, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("compute treehash: %w", err)
 	}
 	treehashPath := common.GetGraphByTreeHash(param.Req.BuildDescription.Remote, treehash, param.Req.BuildDescription.GetStrategy(), param.Req.GetRequestOptions())
 	if !param.BypassCache {
@@ -181,8 +175,7 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 			return graphReader, nil
 		}
 		if !storage.IsNotFound(err) {
-			logger.Errorw("GetTargetGraph: Storage error", zap.Error(err))
-			return nil, common.WithReason(common.FailureReasonStorage, common.ErrorTypeInfra, err)
+			return nil, fmt.Errorf("read graph at treehash %s: %w", treehash, err)
 		}
 		logger.Infow("GetTargetGraph: Treehash not found, computing target graph", zap.String("treehash", treehash))
 	} else {
@@ -199,8 +192,7 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 			StreamLogs:    repoCfg.StreamBazelLogs,
 		})
 		if err != nil {
-			logger.Errorw("GetTargetGraph: Error creating bazel client", zap.Error(err))
-			return nil, common.WithReason(failureReasonBazelClient, common.ErrorTypeInfra, err)
+			return nil, fmt.Errorf("create bazel client: %w", err)
 		}
 		// Use default native graph runner
 		runner = graphrunner.NewNativeGraphRunner(graphrunner.NativeGraphRunnerParams{
@@ -213,30 +205,25 @@ func (b *nativeOrchestrator) GetTargetGraph(ctx context.Context, param GetTarget
 	}
 	result, err := runner.Compute(ctx, ws)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error computing target graph", zap.Error(err))
-		return nil, common.WithReason(failureReasonGraphCompute, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("compute target graph: %w", err)
 	}
 	responses, err := common.ResultToGetTargetGraphResponse(ctx, result)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error converting target graph to response", zap.Error(err))
-		return nil, common.WithReason(failureReasonGraphConvert, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("convert target graph to response: %w", err)
 	}
 	err = storage.WriteGraphStream(ctx, b.storage, treehashPath, responses)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error writing target graph to storage", zap.Error(err))
-		return nil, common.WithReason(common.FailureReasonStorage, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("write graph to storage at %s: %w", treehashPath, err)
 	}
 	treehashCachePath := common.GetTreehashCachePath(param.Req.BuildDescription)
 	treehashReader := bytes.NewReader([]byte(treehash))
 	err = b.storage.Put(ctx, storage.UploadRequest{Key: treehashCachePath, Reader: treehashReader})
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error storing treehash mapping", zap.Error(err))
-		return nil, common.WithReason(common.FailureReasonStorage, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("store treehash mapping at %s: %w", treehashCachePath, err)
 	}
 	graphReader, err := storage.NewGraphReader(ctx, b.storage, treehashPath)
 	if err != nil {
-		logger.Errorw("GetTargetGraph: Error creating graph reader", zap.Error(err))
-		return nil, common.WithReason(common.FailureReasonStorage, common.ErrorTypeInfra, err)
+		return nil, fmt.Errorf("create graph reader at %s: %w", treehashPath, err)
 	}
 	logger.Infow("GetTargetGraph: Done computing and storing target graph", zap.String("treehash", treehash))
 	return graphReader, nil
